@@ -246,13 +246,32 @@ const GlobalLayout = ({ children }) => {
         {/* Top Header Bar */}
         <header className="border-b border-muted flex items-center justify-between px-4 pb-2 text-xs font-tertiary text-muted shrink-0 relative overflow-hidden z-20" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 80%, transparent)', paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-4">
-            <span className="text-accent flex items-center gap-2">
+            <span className="text-accent hidden md:flex items-center gap-2">
               <Terminal size={14} /> 
               <DecryptedText text="SYS.BOOT" speed={40} animateOnMount />
             </span>
             <span className="hidden md:inline-block">
               <DecryptedText text="ID: VY-892 // SECURE CONNECTION" speed={30} delay={500} animateOnMount />
             </span>
+            
+            {/* Mobile Telemetry */}
+            <div className="flex md:hidden items-center gap-3 text-[10px]">
+                {weather && (
+                  <span className="flex items-center gap-1.5 text-accent font-secondary">
+                    <WeatherIcon size={12} strokeWidth={2.5} />
+                    {Math.round(weather.temperature)}°C
+                  </span>
+                )}
+                {battery && (
+                  <>
+                    <span className="text-muted/40">//</span>
+                    <span className="flex items-center gap-1.5 opacity-80">
+                      <Battery size={10} className={battery.charging ? 'text-green-400' : 'text-accent'} />
+                      {battery.level}%
+                    </span>
+                  </>
+                )}
+            </div>
           </div>
           <div className="flex items-center gap-6">
             <div className="hidden sm:flex items-center gap-4 text-[10px]">
@@ -304,18 +323,6 @@ const GlobalLayout = ({ children }) => {
                   </>
                 )}
               </div>
-
-              {/* Micro-Diagnostic Ticker */}
-              <div className="flex items-end gap-[2px] h-3 w-6 overflow-hidden ml-2 opacity-80">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <motion.div 
-                    key={i}
-                    className="w-[2px] bg-accent/70"
-                    animate={{ height: ['20%', '100%', '40%', '80%', '20%'] }}
-                    transition={{ repeat: Infinity, duration: 0.5 + Math.random(), ease: "easeInOut", delay: Math.random() }}
-                  />
-                ))}
-              </div>
             </div>
             
             <button 
@@ -344,7 +351,7 @@ const GlobalLayout = ({ children }) => {
               </div>
             </button>
 
-            <span className="flex items-center gap-2 group cursor-default">
+            <span className="hidden md:flex items-center gap-2 group cursor-default">
               <Activity size={14} className="text-accent animate-pulse" /> 
               <span className="group-hover:anim-glitch-label transition-colors duration-300">ONLINE</span>
             </span>
