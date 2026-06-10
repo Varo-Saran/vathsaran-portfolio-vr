@@ -8,20 +8,22 @@ const StickyTerminal = () => {
 
   return (
     <>
-      <button 
+      <motion.button 
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 p-4 bg-surface/80 backdrop-blur-md border border-accent text-accent hover:bg-accent hover:text-bg transition-colors shadow-[0_0_15px_rgba(var(--color-accent),0.3)] reticle-sm clip-notch ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className={`fixed top-1/2 right-6 -translate-y-1/2 z-50 p-4 bg-surface/80 backdrop-blur-md border border-accent text-accent hover:bg-accent hover:text-bg transition-colors shadow-[0_0_15px_rgba(var(--color-accent),0.3)] reticle-sm clip-notch ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
       >
         <TerminalSquare size={24} />
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[90vw] max-w-[450px] border border-border bg-surface/95 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col group"
+            initial={{ opacity: 0, x: 20, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 20, scale: 0.95 }}
+            className="fixed top-1/2 right-6 -translate-y-1/2 z-50 w-[90vw] max-w-[450px] border border-border bg-surface/95 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col group"
           >
             {/* Header matching RAW_DATA_STREAM aesthetic */}
             <div className="w-full px-4 py-3 bg-bg border-b border-border flex items-center justify-between z-20">
