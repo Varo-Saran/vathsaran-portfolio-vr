@@ -5,7 +5,7 @@ class AudioEngine {
     this.isInitialized = false;
   }
 
-  async init() {
+  init() {
     if (typeof window === 'undefined') return false;
     
     if (!this.ctx) {
@@ -23,17 +23,6 @@ class AudioEngine {
       }
     }
     
-    if (this.ctx.state === 'suspended') {
-      try {
-        console.log("[AudioSystem] Attempting to resume suspended context...");
-        await this.ctx.resume();
-        console.log("[AudioSystem] Context resumed successfully. State:", this.ctx.state);
-      } catch (e) {
-        console.warn("[AudioSystem] Could not resume context. Blocked by autoplay policy.", e);
-        return false;
-      }
-    }
-    
     this.isInitialized = true;
     return true;
   }
@@ -42,10 +31,20 @@ class AudioEngine {
   async playThemeSwitch() {
     if (!this.enabled) return;
     
-    const ready = await this.init();
-    if (!ready || !this.ctx) {
+    if (!this.init() || !this.ctx) {
       console.warn("[AudioSystem] Theme switch aborted: Engine not ready.");
       return;
+    }
+    
+    if (this.ctx.state === 'suspended') {
+      try {
+        console.log("[AudioSystem] Attempting to resume suspended context for Theme Switch...");
+        await this.ctx.resume();
+        console.log("[AudioSystem] Context resumed successfully. State:", this.ctx.state);
+      } catch (e) {
+        console.warn("[AudioSystem] Could not resume context.", e);
+        return;
+      }
     }
     
     if (this.ctx.state !== 'running') {
@@ -55,7 +54,7 @@ class AudioEngine {
     
     console.log("[AudioSystem] Playing Theme Switch sound...");
     try {
-      const t = this.ctx.currentTime;
+      const t = this.ctx.currentTime + 0.02; // Small offset for scheduling safety
       
       // 1. Mechanical Clack (White noise burst)
       const bufferSize = this.ctx.sampleRate * 0.05; // 50ms
@@ -104,13 +103,18 @@ class AudioEngine {
   }
 
   // Low bass sweep up + high-tech trill
-  async playBootSound() {
+  playBootSound() {
     if (!this.enabled) return;
     
     console.log("[AudioSystem] Attempting to play Boot Sound...");
-    const ready = await this.init();
-    if (!ready || !this.ctx) {
-      console.warn("[AudioSystem] Boot sound aborted: Engine not ready (Likely blocked by browser autoplay policy on initial load).");
+    if (!this.init() || !this.ctx) {
+      console.warn("[AudioSystem] Boot sound aborted: Engine not ready.");
+      return;
+    }
+    
+    // Do NOT attempt to resume() here, as it will hang indefinitely waiting for user interaction!
+    if (this.ctx.state === 'suspended') {
+      console.warn("[AudioSystem] Boot sound aborted: Context is suspended (Browser autoplay policy blocked initial load).");
       return;
     }
     
@@ -121,7 +125,7 @@ class AudioEngine {
     
     console.log("[AudioSystem] Playing Boot sound...");
     try {
-      const t = this.ctx.currentTime;
+      const t = this.ctx.currentTime + 0.02;
 
       // 1. Bass sweep
       const osc = this.ctx.createOscillator();
@@ -171,13 +175,20 @@ class AudioEngine {
   async playHover() {
     if (!this.enabled) return;
     
-    const ready = await this.init();
-    if (!ready || !this.ctx) return;
+    if (!this.init() || !this.ctx) return;
+    
+    if (this.ctx.state === 'suspended') {
+      try {
+        await this.ctx.resume();
+      } catch (e) {
+        return;
+      }
+    }
     
     if (this.ctx.state !== 'running') return;
     
     try {
-      const t = this.ctx.currentTime;
+      const t = this.ctx.currentTime + 0.02;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       
