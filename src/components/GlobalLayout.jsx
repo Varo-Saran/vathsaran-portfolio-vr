@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2 } from 'lucide-react';
+import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2, Sun, Cloud, CloudRain, CloudLightning, CloudSnow, CloudFog } from 'lucide-react';
 import { motion } from 'motion/react';
 import DecryptedText from './DecryptedText';
-import CyberBackground from './CyberBackground';
 import StickyTerminal from './StickyTerminal';
 
 // Geolocation Helper
@@ -33,8 +32,19 @@ const GlobalLayout = ({ children }) => {
   const [activeSection, setActiveSection] = useState('ID_CORE');
   const [hoveredNode, setHoveredNode] = useState(null);
   const [trackingStatus, setTrackingStatus] = useState('TRACKING...');
+  const [weather, setWeather] = useState(null);
 
   useEffect(() => {
+    // Fetch live weather for Colombo
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=6.9271&longitude=79.8612&current_weather=true')
+      .then(res => res.json())
+      .then(data => {
+        if(data && data.current_weather) {
+          setWeather(data.current_weather);
+        }
+      })
+      .catch(err => console.error("Weather fetch failed", err));
+
     // Geolocation tracking
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -131,6 +141,17 @@ const GlobalLayout = ({ children }) => {
     hour12: true
   }).format(new Date(time));
 
+  // Determine Weather Icon
+  let WeatherIcon = Sun;
+  if (weather) {
+    const code = weather.weathercode;
+    if (code >= 1 && code <= 3) WeatherIcon = Cloud;
+    else if (code === 45 || code === 48) WeatherIcon = CloudFog;
+    else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) WeatherIcon = CloudRain;
+    else if ((code >= 71 && code <= 77) || code === 85 || code === 86) WeatherIcon = CloudSnow;
+    else if (code >= 95) WeatherIcon = CloudLightning;
+  }
+
   return (
     <div className="min-h-[100dvh] w-full flex justify-center p-0 md:p-4 lg:p-8 overflow-hidden relative selection:bg-accent selection:text-bg">
 
@@ -170,9 +191,6 @@ const GlobalLayout = ({ children }) => {
       {/* Main HUD Container */}
       <div className="w-full max-w-[1400px] border-x-0 md:border md:border-muted relative z-10 flex flex-col backdrop-blur-md transition-colors duration-300 shadow-2xl h-[100dvh] md:h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)]" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 40%, transparent)' }}>
         
-        {/* Cyber WebGL Background inside HUD for visibility */}
-        <CyberBackground />
-
         {/* Top Header Bar */}
         <header className="border-b border-muted flex items-center justify-between px-4 pb-2 text-xs font-tertiary text-muted shrink-0 relative overflow-hidden z-20" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 80%, transparent)', paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-4">
@@ -186,7 +204,17 @@ const GlobalLayout = ({ children }) => {
           </div>
           <div className="flex items-center gap-6">
             <div className="hidden sm:flex items-center gap-3 text-[10px]">
-              <span>LOC: COLOMBO [ {formattedTime} ] // {trackingStatus}</span>
+              <span className="flex items-center gap-2">
+                LOC: COLOMBO [ {formattedTime} ] // 
+                {weather ? (
+                  <span className="text-accent flex items-center gap-1">
+                    {Math.round(weather.temperature)}°C <WeatherIcon size={12} strokeWidth={2.5} />
+                  </span>
+                ) : (
+                  <span>FETCHING WX...</span>
+                )}
+                // {trackingStatus}
+              </span>
               {/* Micro-Diagnostic Ticker */}
               <div className="flex items-end gap-[2px] h-3 w-6 overflow-hidden">
                 {[1, 2, 3, 4, 5].map(i => (

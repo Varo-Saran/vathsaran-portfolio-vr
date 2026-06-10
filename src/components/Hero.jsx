@@ -1,3 +1,4 @@
+// Force HMR reload
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Fingerprint, Database, MapPin, Mail, Globe, ChevronRight, ScanLine, X } from 'lucide-react';
@@ -33,29 +34,7 @@ const Hero = () => {
   const [showDataOverlay, setShowDataOverlay] = useState(false);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-  const [currentTime, setCurrentTime] = useState('');
   const [trackingStatus, setTrackingStatus] = useState('[ ESTABLISHING UPLINK... ]');
-
-  // Live Local Time Sync (Colombo)
-  useEffect(() => {
-    const updateTime = () => {
-      try {
-        const time = new Intl.DateTimeFormat('en-GB', {
-          timeZone: 'Asia/Colombo',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        }).format(new Date());
-        setCurrentTime(time);
-      } catch (e) {
-        // Fallback if timezone is unsupported
-      }
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Live Geolocation Distance Tracking
   useEffect(() => {
@@ -106,7 +85,7 @@ const Hero = () => {
             <div className="flex items-center gap-2">
               <MapPin size={14} className="text-accent shrink-0" />
               <span className="uppercase text-xs tracking-widest whitespace-nowrap">
-                LOC: Colombo {currentTime ? <span className="text-accent/80 font-tertiary ml-1 text-[10px]">[{currentTime}]</span> : ''}
+                LOC: Colombo
               </span>
               
               {/* Dedicated Status Blinker */}
