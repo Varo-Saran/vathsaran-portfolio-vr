@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TerminalSquare, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import InteractiveTerminal from './InteractiveTerminal';
 
 const StickyTerminal = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Lock body scroll when terminal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   return (
     <>
@@ -30,36 +42,47 @@ const StickyTerminal = () => {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed inset-x-4 bottom-24 md:inset-auto md:absolute md:bottom-28 md:left-12 z-[70] md:w-[450px] border border-border bg-surface/95 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col group"
-          >
-            {/* Header matching RAW_DATA_STREAM aesthetic */}
-            <div className="w-full px-4 py-3 bg-bg border-b border-border flex items-center justify-between z-20">
-              <span className="text-[10px] font-tertiary tracking-widest text-accent flex items-center gap-2">
-                <TerminalSquare size={14} /> [ COMMAND_TERMINAL ]
-              </span>
-              <div className="flex items-center gap-4">
-                <span className="w-1.5 h-1.5 bg-accent animate-pulse" />
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  className="text-muted hover:text-accent transition-colors"
-                >
-                  <X size={16} />
-                </button>
+          <>
+            {/* Mobile Backdrop to catch clicks and dim background completely */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-bg/80 backdrop-blur-sm z-[65] md:hidden"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              className="fixed inset-x-4 top-[10vh] md:inset-auto md:absolute md:bottom-28 md:left-12 z-[70] md:w-[450px] border border-border bg-bg md:bg-surface/95 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col group"
+            >
+              {/* Header matching RAW_DATA_STREAM aesthetic */}
+              <div className="w-full px-4 py-3 bg-bg border-b border-border flex items-center justify-between z-20">
+                <span className="text-[10px] font-tertiary tracking-widest text-accent flex items-center gap-2">
+                  <TerminalSquare size={14} /> [ COMMAND_TERMINAL ]
+                </span>
+                <div className="flex items-center gap-4">
+                  <span className="w-1.5 h-1.5 bg-accent animate-pulse" />
+                  <button 
+                    onClick={() => setIsOpen(false)}
+                    className="text-muted hover:text-accent transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Scanning Laser Effect */}
-            <div className="absolute top-[41px] left-0 w-full h-[2px] bg-accent shadow-[0_0_15px_rgba(var(--color-accent),1)] z-10 anim-scan-vertical pointer-events-none opacity-50" />
+              {/* Scanning Laser Effect */}
+              <div className="absolute top-[41px] left-0 w-full h-[2px] bg-accent shadow-[0_0_15px_rgba(var(--color-accent),1)] z-10 anim-scan-vertical pointer-events-none opacity-50" />
 
-            {/* Terminal Content */}
-            <div className="p-4 bg-transparent relative h-[250px] md:h-[300px] flex">
-              <InteractiveTerminal />
-            </div>
-          </motion.div>
+              {/* Terminal Content */}
+              <div className="p-4 bg-transparent relative h-[45vh] md:h-[300px] flex">
+                <InteractiveTerminal />
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

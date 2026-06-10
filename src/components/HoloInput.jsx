@@ -38,7 +38,7 @@ const HoloInput = ({ id, label, type = "text", placeholder, isTextArea = false, 
           placeholder={placeholder}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className={`w-full bg-surface/40 backdrop-blur-md border px-4 py-3 text-sm font-tertiary text-main placeholder-muted/40 focus:outline-none transition-all duration-300 ${isTextArea ? 'resize-none' : ''} ${isFocused ? 'border-accent' : 'border-border group-hover:border-accent/50'}`}
+          className={`w-full bg-surface/40 backdrop-blur-md border px-4 py-3 text-base md:text-sm font-tertiary text-main placeholder-muted/40 focus:outline-none transition-all duration-300 ${isTextArea ? 'resize-none' : ''} ${isFocused ? 'border-accent' : 'border-border group-hover:border-accent/50'}`}
           style={{ WebkitBoxShadow: 'none', boxShadow: 'none' }}
         />
 

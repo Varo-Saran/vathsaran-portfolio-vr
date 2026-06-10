@@ -119,7 +119,7 @@ const InteractiveTerminal = () => {
 
   return (
     <div 
-      className="text-sm md:text-base text-muted leading-relaxed font-tertiary border-l border-accent/50 pl-4 mt-8 h-40 max-w-[65ch] overflow-y-auto w-full custom-scrollbar flex flex-col justify-start cursor-text" 
+      className="text-base text-muted leading-relaxed font-tertiary border-l border-accent/50 pl-4 mt-4 h-full pb-4 max-w-[65ch] overflow-y-auto w-full custom-scrollbar flex flex-col justify-start cursor-text" 
       onClick={() => document.getElementById('terminal-input')?.focus()}
     >
       {history.map((log, i) => (
@@ -148,7 +148,7 @@ const InteractiveTerminal = () => {
             autoComplete="off"
             spellCheck="false"
             autoFocus
-            className="flex-1 bg-transparent border-none outline-none text-accent ml-2 font-tertiary focus:ring-0 p-0 text-sm md:text-base"
+            className="flex-1 bg-transparent border-none outline-none text-accent ml-2 font-tertiary focus:ring-0 p-0 text-base"
           />
         </div>
       )}
