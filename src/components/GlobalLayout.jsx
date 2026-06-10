@@ -30,6 +30,7 @@ const GlobalLayout = ({ children }) => {
     return localStorage.getItem('optics_preference') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
   });
   const [activeSection, setActiveSection] = useState('ID_CORE');
+  const [hoveredNode, setHoveredNode] = useState(null);
   const [weather, setWeather] = useState(null);
   const [trackingStatus, setTrackingStatus] = useState('AWAITING_LOC_DATA');
   const [uptime, setUptime] = useState(0);
