@@ -3,6 +3,7 @@ import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2, Sun, Moon,
 import { motion } from 'motion/react';
 import DecryptedText from './DecryptedText';
 import StickyTerminal from './StickyTerminal';
+import { audioSystem } from '../utils/audioSystem';
 
 // Geolocation Helper
 const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
@@ -40,6 +41,9 @@ const GlobalLayout = ({ children }) => {
   // Load theme preference on mount
 
   useEffect(() => {
+    // Play boot sound on initial mount
+    audioSystem.playBootSound();
+
     // Fetch live weather for Colombo
     fetch('https://api.open-meteo.com/v1/forecast?latitude=6.9271&longitude=79.8612&current_weather=true')
       .then(res => res.json())
@@ -159,6 +163,7 @@ const GlobalLayout = ({ children }) => {
   }, [children]);
 
   const toggleTheme = () => {
+    audioSystem.playThemeSwitch();
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('optics_preference', newTheme);
