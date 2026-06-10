@@ -88,52 +88,54 @@ const SkillsLoadout = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: "-10%" }}
                 transition={{ delay: i * 0.1, duration: 0.3 }}
-                className={`border border-border bg-surface/80 p-5 md:p-6 flex flex-col gap-4 backdrop-blur-md transition-all duration-300 group ${module.span} reticle-md hover:bg-dbh-active hover:clip-notch`}
+                className={`relative group ${module.span} reticle-md`}
               >
-                {/* Diagnostic Header */}
-                <div className="text-[10px] font-tertiary text-muted group-hover:text-white uppercase border-b border-border/50 group-hover:border-white/30 pb-2 flex justify-between tracking-widest transition-colors">
-                  <span>[ MEM_ALLOC: {module.mem}MB ]</span>
-                  <span className="text-accent group-hover:text-white group-hover:animate-pulse transition-all">STATUS: NOMINAL</span>
-                </div>
-                
-                {/* Title */}
-                <h4 className="text-lg md:text-xl font-primary tracking-widest text-main group-hover:text-white uppercase transition-colors">
-                  {module.title}
-                </h4>
-                
-                {/* Segmented Load Bar */}
-                <div className="flex flex-col gap-1 mt-2">
-                  <span className="text-[10px] font-tertiary text-muted group-hover:text-white tracking-widest transition-colors">SYSTEM_LOAD</span>
-                  <div className="flex items-center gap-1">
-                    <div className="flex gap-[2px]">
-                      {[...Array(15)].map((_, idx) => (
-                        <div 
-                          key={idx} 
-                          className={`w-2 h-4 transition-colors duration-300 ${idx < filledBlocks ? 'bg-accent group-hover:bg-white animate-pulse' : 'bg-border/30 group-hover:bg-white/30'}`} 
-                        />
-                      ))}
-                    </div>
-                    <span className="ml-2 text-xs font-tertiary text-accent group-hover:text-white transition-colors">{module.load}%</span>
+                <div className="h-full border border-border bg-surface/80 p-5 md:p-6 flex flex-col gap-4 backdrop-blur-md transition-all duration-300 group-hover:bg-dbh-active group-hover:clip-notch">
+                  {/* Diagnostic Header */}
+                  <div className="text-[10px] font-tertiary text-muted group-hover:text-white uppercase border-b border-border/50 group-hover:border-white/30 pb-2 flex justify-between tracking-widest transition-colors">
+                    <span>[ MEM_ALLOC: {module.mem}MB ]</span>
+                    <span className="text-accent group-hover:text-white group-hover:animate-pulse transition-all">STATUS: NOMINAL</span>
                   </div>
-                </div>
-
-                {/* Terminal Readout List (Skills) */}
-                <div className="flex flex-col gap-1 mt-4">
-                  {module.skills.map((skill, idx) => {
-                    const pid = (idx + 1).toString().padStart(2, '0');
-                    return (
-                      <div key={idx} className="text-[10px] md:text-xs font-tertiary text-muted border-l border-accent/50 group-hover:border-white/30 pl-2 py-[2px] group-hover:text-white transition-colors grid grid-cols-[auto_1fr] gap-3 items-start">
-                        <div className="flex items-center whitespace-nowrap">
-                          <span className="text-accent group-hover:text-white mr-2 transition-colors">{`>`}</span>
-                          <span className="opacity-60 mr-2">PID:{pid}</span>
-                          <span className="text-accent group-hover:text-white opacity-80 min-w-[85px] inline-block transition-colors">
-                            [ RUNNING <span className="inline-block w-4 text-left">{dotSequence}</span> ]
-                          </span>
-                        </div>
-                        <span className="uppercase">{skill}</span>
+                  
+                  {/* Title */}
+                  <h4 className="text-lg md:text-xl font-primary tracking-widest text-main group-hover:text-white uppercase transition-colors">
+                    {module.title}
+                  </h4>
+                  
+                  {/* Segmented Load Bar */}
+                  <div className="flex flex-col gap-1 mt-2">
+                    <span className="text-[10px] font-tertiary text-muted group-hover:text-white tracking-widest transition-colors">SYSTEM_LOAD</span>
+                    <div className="flex items-center gap-1">
+                      <div className="flex gap-[2px]">
+                        {[...Array(15)].map((_, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`w-2 h-4 transition-colors duration-300 ${idx < filledBlocks ? 'bg-accent group-hover:bg-white animate-pulse' : 'bg-border/30 group-hover:bg-white/30'}`} 
+                          />
+                        ))}
                       </div>
-                    );
-                  })}
+                      <span className="ml-2 text-xs font-tertiary text-accent group-hover:text-white transition-colors">{module.load}%</span>
+                    </div>
+                  </div>
+
+                  {/* Terminal Readout List (Skills) */}
+                  <div className="flex flex-col gap-1 mt-4">
+                    {module.skills.map((skill, idx) => {
+                      const pid = (idx + 1).toString().padStart(2, '0');
+                      return (
+                        <div key={idx} className="text-[10px] md:text-xs font-tertiary text-muted border-l border-accent/50 group-hover:border-white/30 pl-2 py-[2px] group-hover:text-white transition-colors grid grid-cols-[auto_1fr] gap-3 items-start">
+                          <div className="flex items-center whitespace-nowrap">
+                            <span className="text-accent group-hover:text-white mr-2 transition-colors">{`>`}</span>
+                            <span className="opacity-60 mr-2">PID:{pid}</span>
+                            <span className="text-accent group-hover:text-white opacity-80 min-w-[85px] inline-block transition-colors">
+                              [ RUNNING <span className="inline-block w-4 text-left">{dotSequence}</span> ]
+                            </span>
+                          </div>
+                          <span className="uppercase">{skill}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </motion.div>
             );

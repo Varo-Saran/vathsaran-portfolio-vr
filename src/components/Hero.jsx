@@ -291,7 +291,7 @@ const Hero = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 1.0, duration: 0.4 }}
-          className="md:hidden fixed right-0 top-1/3 -translate-y-1/2 z-40 py-4 px-2 bg-surface/60 backdrop-blur-md border border-r-0 border-border/50 text-accent font-tertiary flex flex-col items-center gap-3 reticle-sm hover:bg-surface/80 transition-colors shadow-[0_0_15px_rgba(0,0,0,0.5)] rounded-l-md"
+          className="md:hidden fixed right-0 top-1/3 -translate-y-1/2 z-[80] py-4 px-2 bg-surface/60 backdrop-blur-md border border-r-0 border-border/50 text-accent font-tertiary flex flex-col items-center gap-3 reticle-sm hover:bg-surface/80 transition-colors shadow-[0_0_15px_rgba(0,0,0,0.5)] rounded-l-md"
           onClick={() => setIsMobileDrawerOpen(true)}
         >
           <Fingerprint size={16} className="animate-pulse opacity-80" />
