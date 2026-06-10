@@ -2,6 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import DecryptedText from './DecryptedText';
+import CyberBackground from './CyberBackground';
+import StickyTerminal from './StickyTerminal';
+
+// Geolocation Helper
+const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
 const navNodes = [
   { id: 'ID_CORE', label: '[ 01 ] // ID_CORE', icon: Fingerprint },
@@ -18,8 +32,30 @@ const GlobalLayout = ({ children }) => {
   });
   const [activeSection, setActiveSection] = useState('ID_CORE');
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [trackingStatus, setTrackingStatus] = useState('TRACKING...');
 
   useEffect(() => {
+    // Geolocation tracking
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Colombo, Sri Lanka coordinates: 6.9271° N, 79.8612° E
+          const distance = getDistanceFromLatLonInKm(
+            position.coords.latitude, 
+            position.coords.longitude, 
+            6.9271, 
+            79.8612
+          );
+          setTrackingStatus(`${distance.toLocaleString(undefined, { maximumFractionDigits: 0 })} KM FROM HOST`);
+        },
+        () => {
+          setTrackingStatus('LOC_UNAVAILABLE');
+        }
+      );
+    } else {
+      setTrackingStatus('LOC_DISABLED');
+    }
+
     const timer = setInterval(() => {
       setTime(new Date().toISOString());
     }, 1000);
@@ -86,8 +122,18 @@ const GlobalLayout = ({ children }) => {
     }
   };
 
+  // Format time to 12hr Colombo time
+  const formattedTime = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Colombo',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  }).format(new Date(time));
+
   return (
     <div className="min-h-[100dvh] w-full flex justify-center p-0 md:p-4 lg:p-8 overflow-hidden relative selection:bg-accent selection:text-bg">
+
       {/* Background grid lines & Active Nodes */}
       <div className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-300" style={{ opacity: theme === 'light' ? 0.4 : 0.2 }}>
         <div className="w-full h-full" style={{
@@ -124,8 +170,11 @@ const GlobalLayout = ({ children }) => {
       {/* Main HUD Container */}
       <div className="w-full max-w-[1400px] border-x-0 md:border md:border-muted relative z-10 flex flex-col backdrop-blur-md transition-colors duration-300 shadow-2xl h-[100dvh] md:h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)]" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 40%, transparent)' }}>
         
+        {/* Cyber WebGL Background inside HUD for visibility */}
+        <CyberBackground />
+
         {/* Top Header Bar */}
-        <header className="border-b border-muted flex items-center justify-between px-4 pb-2 text-xs font-tertiary text-muted shrink-0 relative overflow-hidden" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 80%, transparent)', paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
+        <header className="border-b border-muted flex items-center justify-between px-4 pb-2 text-xs font-tertiary text-muted shrink-0 relative overflow-hidden z-20" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 80%, transparent)', paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-4">
             <span className="text-accent flex items-center gap-2">
               <Terminal size={14} /> 
@@ -136,8 +185,8 @@ const GlobalLayout = ({ children }) => {
             </span>
           </div>
           <div className="flex items-center gap-6">
-            <div className="hidden sm:flex items-center gap-3">
-              <span>UPTIME: {time.split('T')[1].split('.')[0]} Z</span>
+            <div className="hidden sm:flex items-center gap-3 text-[10px]">
+              <span>LOC: COLOMBO [ {formattedTime} ] // {trackingStatus}</span>
               {/* Micro-Diagnostic Ticker */}
               <div className="flex items-end gap-[2px] h-3 w-6 overflow-hidden">
                 {[1, 2, 3, 4, 5].map(i => (
@@ -210,7 +259,7 @@ const GlobalLayout = ({ children }) => {
                     onClick={() => scrollToSection(node.id)}
                     onMouseEnter={() => setHoveredNode(node.id)}
                     onMouseLeave={() => setHoveredNode(null)}
-                    className={`group relative flex flex-col md:flex-row items-center md:items-center text-center md:text-left transition-all duration-300 outline-none uppercase tracking-widest ${isActive ? 'reticle-nav md:reticle-active opacity-100 text-accent font-bold' : 'opacity-60 md:opacity-40 text-main hover:opacity-100 hover:text-accent'}`}
+                    className={`group relative z-20 flex flex-col md:flex-row items-center md:items-center text-center md:text-left transition-all duration-300 outline-none uppercase tracking-widest ${isActive ? 'reticle-nav md:reticle-active opacity-100 text-accent font-bold' : 'opacity-60 md:opacity-40 text-main hover:opacity-100 hover:text-accent'}`}
                   >
                     {/* Desktop Hover Brackets */}
                     <span className={`hidden md:inline-block transition-transform duration-300 ${isActive ? '-translate-x-1 opacity-0' : 'group-hover:-translate-x-1 opacity-100'}`}>[</span>
@@ -266,6 +315,7 @@ const GlobalLayout = ({ children }) => {
           </main>
         </div>
       </div>
+      <StickyTerminal />
     </div>
   );
 };

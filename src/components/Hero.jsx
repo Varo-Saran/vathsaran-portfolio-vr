@@ -33,6 +33,63 @@ const Hero = () => {
   const [showDataOverlay, setShowDataOverlay] = useState(false);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState('');
+  const [trackingStatus, setTrackingStatus] = useState('[ ESTABLISHING UPLINK... ]');
+
+  // Live Local Time Sync (Colombo)
+  useEffect(() => {
+    const updateTime = () => {
+      try {
+        const time = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Asia/Colombo',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        }).format(new Date());
+        setCurrentTime(time);
+      } catch (e) {
+        // Fallback if timezone is unsupported
+      }
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Live Geolocation Distance Tracking
+  useEffect(() => {
+    const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+      const R = 6371; // Radius of the earth in km
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2); 
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      return R * c;
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const distance = getDistanceFromLatLonInKm(
+            position.coords.latitude, 
+            position.coords.longitude, 
+            6.9271, 
+            79.8612
+          );
+          setTrackingStatus(`[ ${distance.toLocaleString(undefined, { maximumFractionDigits: 0 })} KM FROM HOST ]`);
+        },
+        (error) => {
+          setTrackingStatus('[ HOST TRACKING: DENIED ]');
+        }
+      );
+    } else {
+      setTrackingStatus('[ HOST TRACKING: OFFLINE ]');
+    }
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -45,19 +102,24 @@ const Hero = () => {
     <div className="flex flex-col h-full justify-start gap-4">
       {/* Top Section (Geo-Data) */}
       <div className="flex flex-col gap-2 group/loc">
-        <div className="flex flex-col gap-1 text-main transition-colors">
-          <div className="flex items-center gap-2">
-            <MapPin size={14} className="text-accent shrink-0" />
-            <span className="uppercase text-xs tracking-widest whitespace-nowrap">LOC: Colombo</span>
-            
-            {/* Dedicated Status Blinker */}
-            <div className="ml-2 flex items-center gap-2 shrink-0">
-              <div className="w-1.5 h-1.5 bg-[#00ff41] animate-pulse rounded-none" />
-              <span className="text-[#00ff41] opacity-80 uppercase tracking-widest text-[9px]">ACTIVE</span>
+          <div className="flex flex-col gap-1 text-main transition-colors mt-2">
+            <div className="flex items-center gap-2">
+              <MapPin size={14} className="text-accent shrink-0" />
+              <span className="uppercase text-xs tracking-widest whitespace-nowrap">
+                LOC: Colombo {currentTime ? <span className="text-accent/80 font-tertiary ml-1 text-[10px]">[{currentTime}]</span> : ''}
+              </span>
+              
+              {/* Dedicated Status Blinker */}
+              <div className="ml-2 flex items-center gap-2 shrink-0">
+                <div className="w-1.5 h-1.5 bg-[#00ff41] animate-pulse rounded-none" />
+                <span className="text-[#00ff41] opacity-80 uppercase tracking-widest text-[9px]">ACTIVE</span>
+              </div>
+            </div>
+            <div className="flex flex-col pl-6 font-tertiary text-[9px]">
+              <span className="text-muted/70 group-hover/loc:text-accent transition-colors">[ 6.9271° N, 79.8612° E ]</span>
+              <span className="text-accent/60 animate-pulse">{trackingStatus}</span>
             </div>
           </div>
-          <span className="font-tertiary text-muted/70 pl-6 text-[9px] whitespace-nowrap group-hover/loc:text-accent transition-colors">[ 6.9271° N, 79.8612° E ]</span>
-        </div>
 
         {/* Dedicated Map Expand Button */}
         <div className="pl-6 mt-1">

@@ -159,24 +159,6 @@ const ContactForm = () => {
             </div>
           </div>
           
-          {/* Data Readout Panel */}
-          <div className="mt-12 hidden lg:flex flex-col relative border border-border bg-surface/20 p-4 h-[240px] overflow-hidden group">
-            {/* Header */}
-            <div className="absolute top-0 left-0 w-full px-3 py-2 bg-surface border-b border-border flex items-center justify-between z-20">
-              <span className="text-[10px] font-tertiary tracking-widest text-accent flex items-center gap-2">
-                <TerminalSquare size={12} /> [ RAW_DATA_STREAM ]
-              </span>
-              <span className="w-1.5 h-1.5 bg-accent animate-pulse" />
-            </div>
-
-            {/* Scanning Laser */}
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-accent shadow-[0_0_15px_rgba(var(--color-accent),1)] z-10 anim-scan-vertical" />
-
-            {/* Binary Stream Content */}
-            <div className="mt-10 text-accent/40 font-tertiary text-[10px] whitespace-pre select-none tracking-[0.2em] leading-tight group-hover:text-accent/60 transition-colors duration-500">
-              {dataStream}
-            </div>
-          </div>
         </div>
 
         <div className="lg:col-span-7">
