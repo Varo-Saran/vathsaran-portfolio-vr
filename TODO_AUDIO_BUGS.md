@@ -1,30 +1,47 @@
 # Audio System Bugs & Quirks
 
-## Chromium Silent Playback Bug
-- **Issue**: On Chrome (and sometimes Edge), the `AudioContext` initializes in a `running` state instead of `suspended` even without a user gesture (sometimes due to MEI score). When the user clicks the theme toggle, the console logs `[AudioSystem] Playing Theme Switch sound...` but **no sound is actually heard**.
-- **Logs**:
-  ```
-  [AudioSystem] Attempting to play Boot Sound...
-  [AudioSystem] AudioContext created. State: running
-  [AudioSystem] Playing Boot sound...
-  [AudioSystem] Playing Theme Switch sound...
-  ```
-- **Potential Causes to Investigate**:
-  1. Chromium might be aggressively muting Web Audio API gain nodes if it suspects autoplay evasion, despite reporting `running`.
-  2. The scheduling offset (`currentTime + 0.02`) might need to be dynamically adjusted based on `baseLatency` or `outputLatency`.
-  3. React Strict Mode is double-invoking the `useEffect` (seen in logs as duplicate `Playing Boot sound...`), which might be creating multiple parallel AudioContexts or oscillator nodes that cancel each other out or cause browser throttling.
-  4. The generated white-noise buffer might be triggering a clipping limiter in Chrome's audio pipeline.
-  
-## Browser Autoplay Policy (Brave / Safari)
-- **Issue**: On strict browsers like Brave, the context correctly starts `suspended`. The `playBootSound` is aborted as intended. When clicking the theme toggle, it resumes and plays the theme switch. This behaves correctly, but means the boot sound is intentionally lost on first load.
-- **Logs**:
-  ```
-  [AudioSystem] Attempting to play Boot Sound...
-  [AudioSystem] AudioContext created. State: suspended
-  [AudioSystem] Boot sound aborted: Context is suspended (Browser autoplay policy blocked initial load).
-  ```
+> **Status as of 2026-06-10** — All three original bugs have been resolved by switching to the
+> *Deferred-Unlock Pattern* in `audioSystem.js`. Notes kept below for historical reference.
 
-## Future Fixes to Try
-- Ensure `audioSystem` uses a singleton `AudioContext` reliably across React Strict Mode re-renders.
-- Test replacing the mathematically synthesized Web Audio API nodes with simple HTML5 `<audio>` tags or Howler.js to see if Chrome treats standard `.mp3` or `.wav` playback differently than synthesized oscillator nodes.
-- Add a "Click to Enter" overlay on the entire site to guarantee a user gesture before the application mounts, thus unlocking the `AudioContext` perfectly for the Boot Sound and subsequent interactions.
+---
+
+## ✅ FIXED — Chromium Silent Playback
+
+- **Root cause**: The `AudioContext` was being created on module load (before any user gesture).
+  Chrome technically allowed `state: running` in that case (due to high MEI score), but still
+  silently muted all oscillator output because it detected autoplay evasion.
+- **Fix**: The `AudioContext` is now **never created until the first user gesture**
+  (`click`, `keydown`, or `touchstart`). A one-time capture-phase listener on `window` handles
+  this. Contexts created inside a gesture handler are guaranteed to start in `running` state and
+  are never muted.
+
+---
+
+## ✅ FIXED — React Strict Mode Double Boot Sound
+
+- **Root cause**: React 18 Strict Mode double-invokes `useEffect` in development. The `playBootSound()`
+  call inside the mount effect was therefore called twice, creating two overlapping boot sequences.
+- **Fix**: A `_bootPlayed` flag on the singleton ensures `_doPlayBoot()` can only execute once per
+  page session, regardless of how many times `playBootSound()` is called.
+
+---
+
+## ✅ FIXED — Boot Sound Never Playing on Hard Refresh
+
+- **Root cause**: On a hard refresh, the `AudioContext` started `suspended`. `playBootSound()` aborted
+  immediately. By the time the user clicked (e.g. the theme toggle), the boot window had passed.
+- **Fix**: If `playBootSound()` is called before the gesture arrives, it sets `_pendingBoot = true`
+  instead of aborting. The gesture handler (`_onFirstGesture`) checks this flag and fires the boot
+  sound immediately after unlocking the context.
+- **HMR Quirk (informational)**: The boot sound was previously observed to play only during Vite HMR
+  hot-swaps. This was because HMR remounted the component while the user's previous gesture kept
+  the context alive. This quirk is now irrelevant since boot always plays on first gesture.
+
+---
+
+## Future Improvements (Not Bugs)
+
+- Consider adding a `DynamicsCompressorNode` as a master bus to prevent clipping when multiple
+  oscillators play simultaneously (e.g. during the boot trill).
+- The `playKeystroke` throttling could be improved — rapid typing fires many overlapping nodes.
+  A simple timestamp debounce (e.g. min 30ms between keystrokes) would reduce audio CPU load.

@@ -1,366 +1,316 @@
+/**
+ * AudioEngine — Deferred-Unlock Pattern
+ *
+ * The AudioContext is NOT created on page load. Instead, it is created and
+ * immediately unlocked on the very first user gesture (click/keydown/touchstart).
+ * At that moment the boot sound plays. Every subsequent sound just checks
+ * this.ctx.state === 'running', with no resume() gymnastics needed.
+ *
+ * This solves:
+ *  - Chromium silent playback (context was created before gesture → muted)
+ *  - React Strict Mode double-invoke (second call is a no-op via bootPlayed guard)
+ *  - Boot sound never playing on hard refresh (now always plays on first click)
+ */
+
 class AudioEngine {
   constructor() {
     this.ctx = null;
-    this.enabled = true; // Hardcoded to true for now, can be toggled later
-    this.isInitialized = false;
+    this.enabled = true;
+    this._bootPlayed = false;
+    this._unlockBound = this._onFirstGesture.bind(this);
+    this._pendingBoot = false;
+
+    if (typeof window !== 'undefined') {
+      // Register gesture listeners immediately so we catch the very first click
+      window.addEventListener('click',      this._unlockBound, { once: true, capture: true });
+      window.addEventListener('keydown',    this._unlockBound, { once: true, capture: true });
+      window.addEventListener('touchstart', this._unlockBound, { once: true, capture: true });
+    }
   }
 
-  init() {
-    if (typeof window === 'undefined') return false;
-    
-    if (!this.ctx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) {
-        console.warn("[AudioSystem] Web Audio API not supported in this browser.");
-        return false;
-      }
-      try {
-        this.ctx = new AudioContext();
-        console.log("[AudioSystem] AudioContext created. State:", this.ctx.state);
-      } catch (e) {
-        console.error("[AudioSystem] Failed to create AudioContext:", e);
-        return false;
-      }
-    }
-    
-    this.isInitialized = true;
-    return true;
-  }
+  /** Called once on the first user gesture anywhere on the page */
+  _onFirstGesture() {
+    if (this.ctx) return; // already unlocked
 
-  // Heavy mechanical clack + electric surge
-  async playThemeSwitch() {
-    if (!this.enabled) return;
-    
-    if (!this.init() || !this.ctx) {
-      console.warn("[AudioSystem] Theme switch aborted: Engine not ready.");
-      return;
-    }
-    
-    if (this.ctx.state === 'suspended') {
-      try {
-        console.log("[AudioSystem] Attempting to resume suspended context for Theme Switch...");
-        await this.ctx.resume();
-        console.log("[AudioSystem] Context resumed successfully. State:", this.ctx.state);
-      } catch (e) {
-        console.warn("[AudioSystem] Could not resume context.", e);
-        return;
-      }
-    }
-    
-    if (this.ctx.state !== 'running') {
-      console.warn("[AudioSystem] Theme switch aborted: Context state is", this.ctx.state);
-      return;
-    }
-    
-    console.log("[AudioSystem] Playing Theme Switch sound...");
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+
     try {
-      const t = this.ctx.currentTime + 0.02; // Small offset for scheduling safety
-      
-      // 1. Mechanical Clack (White noise burst)
-      const bufferSize = this.ctx.sampleRate * 0.05; // 50ms
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
+      this.ctx = new AudioContext();
+      // Context created during a gesture is guaranteed to be 'running' in all browsers
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
       }
-      
-      const noiseSource = this.ctx.createBufferSource();
-      noiseSource.buffer = buffer;
-      
-      const noiseFilter = this.ctx.createBiquadFilter();
-      noiseFilter.type = 'lowpass';
-      noiseFilter.frequency.value = 1000;
-      
-      const noiseGain = this.ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.8, t);
-      noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
-      
-      noiseSource.connect(noiseFilter);
-      noiseFilter.connect(noiseGain);
-      noiseGain.connect(this.ctx.destination);
-      
-      noiseSource.start(t);
+    } catch (e) {
+      return;
+    }
 
-      // 2. Electric hum (Low frequency sawtooth descending)
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(80, t);
-      osc.frequency.exponentialRampToValueAtTime(20, t + 0.3);
-      
-      gain.gain.setValueAtTime(0.2, t);
-      gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
-      
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      
-      osc.start(t);
-      osc.stop(t + 0.3);
-    } catch(e) {
-      console.error("[AudioSystem] Theme switch audio play failed:", e);
+    // If someone called playBootSound() before the gesture arrived, fire it now
+    if (this._pendingBoot) {
+      this._pendingBoot = false;
+      this._doPlayBoot();
     }
   }
 
-  // Low bass sweep up + high-tech trill
+  /** Schedule t = currentTime + offset, safe to call any time after unlock */
+  _t(offset = 0.02) {
+    return this.ctx.currentTime + offset;
+  }
+
+  // ─── Public API ───────────────────────────────────────────────────────────
+
+  /**
+   * Request a boot sound. If the AudioContext isn't unlocked yet (e.g. called
+   * from a useEffect before any click), set a pending flag so it fires on the
+   * first gesture instead of silently failing.
+   */
   playBootSound() {
-    if (!this.enabled) return;
-    
-    console.log("[AudioSystem] Attempting to play Boot Sound...");
-    if (!this.init() || !this.ctx) {
-      console.warn("[AudioSystem] Boot sound aborted: Engine not ready.");
+    if (!this.enabled || this._bootPlayed) return;
+    this._bootPlayed = true; // prevent Strict Mode double-invoke
+
+    if (!this.ctx || this.ctx.state !== 'running') {
+      // Park it — will fire in _onFirstGesture
+      this._pendingBoot = true;
       return;
     }
-    
-    // Do NOT attempt to resume() here, as it will hang indefinitely waiting for user interaction!
-    if (this.ctx.state === 'suspended') {
-      console.warn("[AudioSystem] Boot sound aborted: Context is suspended (Browser autoplay policy blocked initial load).");
-      return;
-    }
-    
-    if (this.ctx.state !== 'running') {
-      console.warn("[AudioSystem] Boot sound aborted: Context state is", this.ctx.state);
-      return;
-    }
-    
-    console.log("[AudioSystem] Playing Boot sound...");
+
+    this._doPlayBoot();
+  }
+
+  _doPlayBoot() {
+    if (!this.ctx) return;
     try {
-      const t = this.ctx.currentTime + 0.02;
+      const t = this._t(0.05);
 
       // 1. Bass sweep
-      const osc = this.ctx.createOscillator();
+      const osc  = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      
       osc.type = 'sine';
       osc.frequency.setValueAtTime(30, t);
       osc.frequency.exponentialRampToValueAtTime(150, t + 1.5);
-      
-      gain.gain.setValueAtTime(0.01, t); // Start low to avoid click
-      gain.gain.linearRampToValueAtTime(0.4, t + 0.5);
+      gain.gain.setValueAtTime(0.01, t);
+      gain.gain.linearRampToValueAtTime(0.35, t + 0.5);
       gain.gain.linearRampToValueAtTime(0.01, t + 1.5);
-      
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      
       osc.start(t);
       osc.stop(t + 1.5);
 
-      // 2. High tech data trills
+      // 2. High-tech data trills
       let trillTime = t;
       for (let i = 0; i < 15; i++) {
-        const trillOsc = this.ctx.createOscillator();
-        const trillGain = this.ctx.createGain();
-        
-        trillOsc.type = 'square';
-        // Random frequency between 800 and 1600 Hz
-        trillOsc.frequency.setValueAtTime(800 + Math.random() * 800, trillTime);
-        
-        trillGain.gain.setValueAtTime(0.03, trillTime);
-        trillGain.gain.exponentialRampToValueAtTime(0.001, trillTime + 0.05);
-        
-        trillOsc.connect(trillGain);
-        trillGain.connect(this.ctx.destination);
-        
-        trillOsc.start(trillTime);
-        trillOsc.stop(trillTime + 0.05);
-        
-        trillTime += 0.05 + Math.random() * 0.05; // Random interval
+        const to = this.ctx.createOscillator();
+        const tg = this.ctx.createGain();
+        to.type = 'square';
+        to.frequency.setValueAtTime(800 + Math.random() * 800, trillTime);
+        tg.gain.setValueAtTime(0.025, trillTime);
+        tg.gain.exponentialRampToValueAtTime(0.001, trillTime + 0.05);
+        to.connect(tg);
+        tg.connect(this.ctx.destination);
+        to.start(trillTime);
+        to.stop(trillTime + 0.05);
+        trillTime += 0.05 + Math.random() * 0.05;
       }
-    } catch(e) {
-      console.error("[AudioSystem] Boot sound play failed:", e);
-    }
+    } catch (_) {}
   }
 
-  // Very subtle blip
-  async playHover() {
-    if (!this.enabled) return;
-    
-    if (!this.init() || !this.ctx) return;
-    
-    if (this.ctx.state === 'suspended') {
-      try {
-        await this.ctx.resume();
-      } catch (e) {
-        return;
-      }
-    }
-    
-    if (this.ctx.state !== 'running') return;
-    
+  /** Heavy mechanical clack + electric surge */
+  async playThemeSwitch() {
+    if (!this._ready()) return;
     try {
-      const t = this.ctx.currentTime + 0.02;
-      const osc = this.ctx.createOscillator();
+      const t = this._t();
+
+      // Mechanical clack (filtered white noise)
+      const bufferSize = this.ctx.sampleRate * 0.05;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data   = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+      const noise      = this.ctx.createBufferSource();
+      noise.buffer     = buffer;
+      const noiseFilter = this.ctx.createBiquadFilter();
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.value = 1000;
+      const noiseGain  = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.7, t);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+      noise.start(t);
+
+      // Electric hum
+      const osc  = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(80, t);
+      osc.frequency.exponentialRampToValueAtTime(20, t + 0.3);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    } catch (_) {}
+  }
+
+  /** Very subtle hover blip */
+  async playHover() {
+    if (!this._ready()) return;
+    try {
+      const t = this._t();
+      const osc  = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(1200, t);
       osc.frequency.exponentialRampToValueAtTime(800, t + 0.05);
-      
-      gain.gain.setValueAtTime(0.02, t);
+      gain.gain.setValueAtTime(0.018, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-      
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      
       osc.start(t);
       osc.stop(t + 0.05);
-    } catch(e) {
-      // fail silently
-    }
+    } catch (_) {}
   }
 
-  // Fast mechanical keystroke click
+  /** Fast mechanical keystroke click */
   async playKeystroke() {
-    if (!this.enabled || !this.init() || !this.ctx || this.ctx.state !== 'running') return;
+    if (!this._ready()) return;
     try {
-      const t = this.ctx.currentTime + 0.01;
-      const osc = this.ctx.createOscillator();
+      const t = this._t(0.01);
+      const osc  = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      
       osc.type = 'square';
       osc.frequency.setValueAtTime(400, t);
       osc.frequency.exponentialRampToValueAtTime(100, t + 0.02);
-      
-      gain.gain.setValueAtTime(0.015, t);
+      gain.gain.setValueAtTime(0.012, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
-      
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      
       osc.start(t);
       osc.stop(t + 0.02);
-    } catch(e) {}
+    } catch (_) {}
   }
 
-  // Access Granted Chime
+  /** Access Granted — ascending two-tone chime */
   async playTerminalSuccess() {
-    if (!this.enabled || !this.init() || !this.ctx || this.ctx.state !== 'running') return;
+    if (!this._ready()) return;
     try {
-      const t = this.ctx.currentTime + 0.02;
-      const osc = this.ctx.createOscillator();
+      const t = this._t();
+      const osc  = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, t);
-      osc.frequency.setValueAtTime(1200, t + 0.1); // jump up
-      
+      osc.frequency.setValueAtTime(800,  t);
+      osc.frequency.setValueAtTime(1200, t + 0.12);
       gain.gain.setValueAtTime(0.05, t);
-      gain.gain.setValueAtTime(0.05, t + 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-      
+      gain.gain.setValueAtTime(0.05, t + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      
       osc.start(t);
-      osc.stop(t + 0.4);
-    } catch(e) {}
+      osc.stop(t + 0.45);
+    } catch (_) {}
   }
 
-  // Access Denied Buzz
+  /** Access Denied — short sawtooth buzz */
   async playTerminalError() {
-    if (!this.enabled || !this.init() || !this.ctx || this.ctx.state !== 'running') return;
+    if (!this._ready()) return;
     try {
-      const t = this.ctx.currentTime + 0.02;
-      const osc = this.ctx.createOscillator();
+      const t = this._t();
+      const osc  = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(100, t);
-      osc.frequency.setValueAtTime(100, t + 0.1);
-      
-      gain.gain.setValueAtTime(0.05, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-      
+      gain.gain.setValueAtTime(0.04, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      
       osc.start(t);
-      osc.stop(t + 0.2);
-    } catch(e) {}
+      osc.stop(t + 0.22);
+    } catch (_) {}
   }
 
-  // Sonar Ping for mapping new sectors
+  /** Sonar ping on section change */
   async playSonarPing() {
-    if (!this.enabled || !this.init() || !this.ctx || this.ctx.state !== 'running') return;
+    if (!this._ready()) return;
     try {
-      const t = this.ctx.currentTime + 0.02;
-      const osc = this.ctx.createOscillator();
+      const t = this._t();
+      const osc  = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      
       osc.type = 'sine';
       osc.frequency.setValueAtTime(1500, t);
-      
-      gain.gain.setValueAtTime(0.03, t);
+      gain.gain.setValueAtTime(0.025, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-      
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      
       osc.start(t);
       osc.stop(t + 0.5);
-    } catch(e) {}
+    } catch (_) {}
   }
 
-  // Uplink Established (Radio click + Data burst)
+  /** Uplink Established — radio click + data burst */
   async playUplinkEstablished() {
-    if (!this.enabled || !this.init() || !this.ctx || this.ctx.state !== 'running') return;
+    if (!this._ready()) return;
     try {
-      const t = this.ctx.currentTime + 0.02;
-      
+      const t = this._t();
+
       // Radio click
-      const clickOsc = this.ctx.createOscillator();
-      const clickGain = this.ctx.createGain();
-      clickOsc.type = 'square';
-      clickOsc.frequency.setValueAtTime(200, t);
-      clickGain.gain.setValueAtTime(0.05, t);
-      clickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-      clickOsc.connect(clickGain);
-      clickGain.connect(this.ctx.destination);
-      clickOsc.start(t);
-      clickOsc.stop(t + 0.05);
-      
+      const co = this.ctx.createOscillator();
+      const cg = this.ctx.createGain();
+      co.type = 'square';
+      co.frequency.setValueAtTime(200, t);
+      cg.gain.setValueAtTime(0.04, t);
+      cg.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+      co.connect(cg);
+      cg.connect(this.ctx.destination);
+      co.start(t);
+      co.stop(t + 0.05);
+
       // Data burst
-      let trillTime = t + 0.05;
+      let tt = t + 0.06;
       for (let i = 0; i < 20; i++) {
-        const trillOsc = this.ctx.createOscillator();
-        const trillGain = this.ctx.createGain();
-        trillOsc.type = 'sawtooth';
-        trillOsc.frequency.setValueAtTime(1000 + Math.random() * 2000, trillTime);
-        trillGain.gain.setValueAtTime(0.02, trillTime);
-        trillGain.gain.exponentialRampToValueAtTime(0.001, trillTime + 0.03);
-        trillOsc.connect(trillGain);
-        trillGain.connect(this.ctx.destination);
-        trillOsc.start(trillTime);
-        trillOsc.stop(trillTime + 0.03);
-        trillTime += 0.02 + Math.random() * 0.02;
+        const to = this.ctx.createOscillator();
+        const tg = this.ctx.createGain();
+        to.type = 'sawtooth';
+        to.frequency.setValueAtTime(1000 + Math.random() * 2000, tt);
+        tg.gain.setValueAtTime(0.018, tt);
+        tg.gain.exponentialRampToValueAtTime(0.001, tt + 0.03);
+        to.connect(tg);
+        tg.connect(this.ctx.destination);
+        to.start(tt);
+        to.stop(tt + 0.03);
+        tt += 0.02 + Math.random() * 0.02;
       }
-    } catch(e) {}
+    } catch (_) {}
   }
 
-  // Payload Delivered Chime
+  /** Payload Delivered — ascending confirmation chime */
   async playPayloadDelivered() {
-    if (!this.enabled || !this.init() || !this.ctx || this.ctx.state !== 'running') return;
+    if (!this._ready()) return;
     try {
-      const t = this.ctx.currentTime + 0.02;
-      const osc = this.ctx.createOscillator();
+      const t = this._t();
+      const osc  = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      
       osc.type = 'sine';
       osc.frequency.setValueAtTime(1000, t);
-      osc.frequency.setValueAtTime(2000, t + 0.1);
-      
+      osc.frequency.setValueAtTime(2000, t + 0.12);
       gain.gain.setValueAtTime(0.05, t);
-      gain.gain.setValueAtTime(0.05, t + 0.1);
+      gain.gain.setValueAtTime(0.05, t + 0.12);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-      
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      
       osc.start(t);
       osc.stop(t + 0.5);
-    } catch(e) {}
+    } catch (_) {}
+  }
+
+  // ─── Internal helpers ─────────────────────────────────────────────────────
+
+  /** Returns true only if audio is enabled AND the context is live */
+  _ready() {
+    return this.enabled && this.ctx && this.ctx.state === 'running';
   }
 }
 
-// Export a singleton instance
+// Singleton — one instance shared across the whole app
 export const audioSystem = new AudioEngine();
