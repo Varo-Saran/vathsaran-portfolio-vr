@@ -411,11 +411,15 @@ const Hero = () => {
               transition={{ delay: 1.4, duration: 0.2 }}
               className="flex flex-wrap gap-4 mt-8"
             >
-              <button className="bg-accent text-bg font-primary uppercase tracking-widest text-sm px-6 py-3 hover:bg-dbh-active hover:text-white transition-colors duration-200 flex items-center gap-2 group clip-notch reticle-lg border border-transparent">
-                <span className="font-tertiary group-hover:text-white/60">#</span> INITIATE_CONTACT
+              <button className="relative group reticle-lg outline-none border border-transparent" onClick={() => document.getElementById('COM_LNK')?.scrollIntoView({ behavior: 'smooth' })}>
+                <div className="bg-accent text-bg font-primary uppercase tracking-widest text-sm px-6 py-3 group-hover:bg-dbh-active group-hover:text-white transition-colors duration-200 flex items-center gap-2 clip-notch w-full h-full">
+                  <span className="font-tertiary group-hover:text-white/60">#</span> INITIATE_CONTACT
+                </div>
               </button>
-              <a href="/CV_Vathsaran_Yasotharan.pdf" target="_blank" rel="noreferrer" className="border border-accent/50 bg-surface/50 text-accent font-primary uppercase tracking-widest text-sm px-6 py-3 hover:bg-dbh-active hover:text-white hover:border-transparent transition-colors duration-200 flex items-center gap-2 clip-notch reticle-lg">
-                DOWNLOAD_DATASET [CV]
+              <a href="/CV_Vathsaran_Yasotharan.pdf" target="_blank" rel="noreferrer" className="relative group reticle-lg outline-none block">
+                <div className="border border-accent/50 bg-surface/50 text-accent font-primary uppercase tracking-widest text-sm px-6 py-3 group-hover:bg-dbh-active group-hover:text-white group-hover:border-transparent transition-colors duration-200 flex items-center gap-2 clip-notch w-full h-full">
+                  DOWNLOAD_DATASET [CV]
+                </div>
               </a>
             </motion.div>
           </div>

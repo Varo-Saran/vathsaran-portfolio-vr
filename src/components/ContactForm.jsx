@@ -123,7 +123,7 @@ const ContactForm = () => {
                 const Icon = social.icon;
                 const inner = (
                   <div 
-                    className="group flex flex-col p-4 border border-border/50 bg-surface/30 hover:bg-surface hover:border-accent/50 transition-all duration-300 relative overflow-hidden cursor-pointer h-[80px] justify-between"
+                    className="group flex flex-col p-4 border border-border/50 bg-surface/30 hover:bg-surface hover:border-accent/50 transition-all duration-300 relative cursor-pointer h-[80px] justify-between reticle-sm"
                     onMouseEnter={() => setHoveredSocial(social.id)}
                     onMouseLeave={() => setHoveredSocial(null)}
                   >
