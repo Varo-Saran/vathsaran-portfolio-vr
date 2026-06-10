@@ -342,8 +342,8 @@ const GlobalLayout = ({ children }) => {
             </footer>
           </main>
         </div>
+        <StickyTerminal />
       </div>
-      <StickyTerminal />
     </div>
   );
 };
