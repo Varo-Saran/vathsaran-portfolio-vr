@@ -32,6 +32,7 @@ const Hero = () => {
   const [bootComplete, setBootComplete] = useState(false);
   const [showDataOverlay, setShowDataOverlay] = useState(false);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,6 +40,147 @@ const Hero = () => {
     }, 2500);
     return () => clearTimeout(timer);
   }, []);
+
+  const IdentityCard = (
+    <div className="relative p-2 border border-border bg-surface w-full max-w-sm mx-auto group">
+      {/* Corner targeting marks */}
+      <div className="absolute -top-[5px] -left-[5px] w-3 h-3 border-t border-l border-accent z-10" />
+      <div className="absolute -top-[5px] -right-[5px] w-3 h-3 border-t border-r border-accent z-10" />
+      <div className="absolute -bottom-[5px] -left-[5px] w-3 h-3 border-b border-l border-accent z-10" />
+      <div className="absolute -bottom-[5px] -right-[5px] w-3 h-3 border-b border-r border-accent z-10" />
+      
+      <div 
+        className="w-full aspect-[3/4] relative overflow-hidden bg-bg"
+        style={{ clipPath: 'polygon(15% 0%, 100% 0%, 100% 85%, 85% 100%, 0% 100%, 0% 15%)' }}
+      >
+        {/* Tactical Image Render */}
+        <img 
+          src={identityScan} 
+          alt="Vathsaran Yasotharan Identity Scan"
+          className="absolute inset-0 w-full h-full object-cover filter grayscale contrast-125 mix-blend-luminosity opacity-80 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500"
+        />
+
+        {/* Optics blend layers */}
+        <div className="absolute inset-0 bg-accent/20 mix-blend-color z-10 pointer-events-none transition-colors duration-500" />
+        <div className="absolute inset-0 bg-bg/10 mix-blend-multiply z-10 pointer-events-none" />
+        
+        {/* Scanning line animation */}
+        <motion.div 
+          className="absolute top-0 left-0 w-full h-1 bg-accent/50 blur-[2px] z-20 pointer-events-none"
+          animate={{ y: ["0%", "400%"] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+        />
+
+        {/* Target Overlay Button */}
+        <motion.button 
+          className="absolute top-6 left-6 z-50 p-2 border border-accent bg-bg/80 text-accent hover:bg-dbh-active hover:text-white transition-colors flex items-center group/btn outline-none shadow-[0_0_10px_rgba(0,0,0,0.5)] clip-notch-sm"
+          onClick={() => setShowDataOverlay(!showDataOverlay)}
+          aria-label="Toggle Telemetry Overlay"
+          animate={{ x: [0, 4, 0] }}
+          transition={{ repeat: Infinity, duration: 0.15, repeatDelay: 2, ease: "linear" }}
+        >
+          <ChevronRight size={14} className={`transform transition-transform ${showDataOverlay ? 'rotate-90' : ''}`} />
+        </motion.button>
+
+        {/* Telemetry Data Overlay (Interactive Screen) */}
+        <AnimatePresence>
+          {showDataOverlay && (
+            <motion.div 
+              initial={{ opacity: 0, clipPath: 'inset(100% 0 0 0)', backdropFilter: "blur(0px)" }}
+              animate={{ opacity: 1, clipPath: 'inset(0% 0 0 0)', backdropFilter: "blur(16px)" }}
+              exit={{ opacity: 0, clipPath: 'inset(0% 0 100% 0)', backdropFilter: "blur(0px)" }}
+              transition={{ duration: 0.4, ease: "anticipate" }}
+              className="absolute inset-0 z-20 bg-surface/80 border border-border flex flex-col p-6 pt-20 font-tertiary text-[10px]"
+            >
+              <div className="flex flex-col h-full justify-start gap-4">
+                
+                {/* Top Section (Geo-Data) */}
+                <div className="flex flex-col gap-2 group/loc">
+                  <div className="flex flex-col gap-1 text-main transition-colors">
+                    <div className="flex items-center gap-2">
+                      <MapPin size={14} className="text-accent shrink-0" />
+                      <span className="uppercase text-xs tracking-widest whitespace-nowrap">LOC: Colombo</span>
+                      
+                      {/* Dedicated Status Blinker */}
+                      <div className="ml-2 flex items-center gap-2 shrink-0">
+                        <div className="w-1.5 h-1.5 bg-[#00ff41] animate-pulse rounded-none" />
+                        <span className="text-[#00ff41] opacity-80 uppercase tracking-widest text-[9px]">ACTIVE</span>
+                      </div>
+                    </div>
+                    <span className="font-tertiary text-muted/70 pl-6 text-[9px] whitespace-nowrap group-hover/loc:text-accent transition-colors">[ 6.9271° N, 79.8612° E ]</span>
+                  </div>
+
+                  {/* Dedicated Map Expand Button */}
+                  <div className="pl-6 mt-1">
+                    <button 
+                      onClick={() => setIsMapExpanded(!isMapExpanded)}
+                      className="flex items-center justify-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/30 text-accent hover:bg-accent hover:text-bg transition-colors text-[9px] tracking-widest font-tertiary shadow-[0_0_10px_rgba(var(--color-accent),0.1)] w-max reticle-sm"
+                    >
+                      <ScanLine size={10} className="animate-pulse" />
+                      {isMapExpanded ? "COLLAPSE" : "SCAN"}
+                    </button>
+                  </div>
+                
+                  {/* Geo-Location Map Expandable */}
+                  <AnimatePresence>
+                    {isMapExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "120px", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full overflow-hidden border border-accent/50 mt-2"
+                      >
+                        <iframe 
+                          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126743.58585978168!2d79.77380315264878!3d6.921922084534571!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae253d10f7a7003%3A0x320b2e4d32d3838d!2sColombo%2C%20Sri%20Lanka!5e0!3m2!1sen!2sus!4v1717800000000!5m2!1sen!2sus" 
+                          width="100%" 
+                          height="100%" 
+                          style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg) grayscale(80%)' }} 
+                          allowFullScreen="" 
+                          loading="lazy" 
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title="Colombo Geo-Location Uplink"
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                
+                {/* Divider */}
+                <div className="w-full border-t border-dashed border-accent/40" />
+                
+                {/* Bottom Section (Comm-Links) in Grid */}
+                <div className="grid grid-cols-2 gap-2 uppercase mt-2">
+                  {[
+                    { id: 'EMAIL', icon: <IconGmail size={14} />, href: 'mailto:varosaran@gmail.com' },
+                    { id: 'GITHUB', icon: <IconGitHub size={14} />, href: 'https://github.com/vathsaran' },
+                    { id: 'LINKEDIN', icon: <IconLinkedIn size={14} />, href: 'https://linkedin.com/in/vathsaran' },
+                    { id: 'X_TWITTER', icon: <IconX size={14} />, href: 'https://twitter.com/vathsaran' },
+                    { id: 'WEBSITE', icon: <Globe size={14} />, href: 'https://vathsaran.com' }
+                  ].map((social, idx) => (
+                    <a 
+                      key={idx}
+                      href={social.href} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className={`group/link flex items-center justify-center p-2 border border-border/40 bg-surface/20 hover:bg-surface hover:border-accent/50 transition-all duration-300 relative overflow-hidden cursor-pointer reticle-sm ${social.id === 'WEBSITE' ? 'col-span-2' : ''}`}
+                    >
+                      <div className="flex items-center justify-center w-full text-muted group-hover/link:text-accent transition-colors z-10 relative gap-2">
+                        <span className="text-accent/70 group-hover/link:text-accent">{social.icon}</span>
+                        <span className="tracking-widest text-[9px]">{social.id}</span>
+                      </div>
+                      {/* Glitch hover bg effect */}
+                      <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover/link:opacity-100 transition-opacity pointer-events-none" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
 
   return (
     <section id="ID_CORE" className="min-h-[85vh] w-full flex flex-col justify-center px-4 md:px-12 lg:px-24 pt-12 pb-24 border-b border-border relative">
@@ -71,154 +213,31 @@ const Hero = () => {
       </div>
 
       <div className="max-w-6xl relative z-10 w-full flex flex-col justify-center">
-        <motion.div layout className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        
+        {/* Mobile Telemetry Toggle */}
+        <motion.button 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.0, duration: 0.3 }}
+          className="md:hidden w-full flex items-center justify-between p-4 border border-border bg-surface/50 mb-8 text-accent font-tertiary tracking-widest text-xs reticle-sm z-20 backdrop-blur-md"
+          onClick={() => setIsMobileDrawerOpen(true)}
+        >
+          <span className="flex items-center gap-2">
+            <Fingerprint size={16} /> [ VIEW_TELEMETRY ]
+          </span>
+          <ScanLine size={16} className="animate-pulse" />
+        </motion.button>
+
+        <motion.div layout className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
           
-          {/* Left Column (Identity Image Overlay System) */}
+          {/* Left Column (Identity Image Overlay System - Desktop Only) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.3, duration: 0.3 }}
-            className="lg:col-span-4 flex flex-col justify-center h-full"
+            className="hidden md:flex lg:col-span-4 flex-col justify-center h-full"
           >
-            {/* Image container with geometric clip path and 1px borders */}
-            <div className="relative p-2 border border-border bg-surface w-full max-w-sm mx-auto group">
-              {/* Corner targeting marks */}
-              <div className="absolute -top-[5px] -left-[5px] w-3 h-3 border-t border-l border-accent z-10" />
-              <div className="absolute -top-[5px] -right-[5px] w-3 h-3 border-t border-r border-accent z-10" />
-              <div className="absolute -bottom-[5px] -left-[5px] w-3 h-3 border-b border-l border-accent z-10" />
-              <div className="absolute -bottom-[5px] -right-[5px] w-3 h-3 border-b border-r border-accent z-10" />
-              
-              <div 
-                className="w-full aspect-[3/4] relative overflow-hidden bg-bg"
-                style={{ clipPath: 'polygon(15% 0%, 100% 0%, 100% 85%, 85% 100%, 0% 100%, 0% 15%)' }}
-              >
-                {/* Tactical Image Render */}
-                <img 
-                  src={identityScan} 
-                  alt="Vathsaran Yasotharan Identity Scan"
-                  className="absolute inset-0 w-full h-full object-cover filter grayscale contrast-125 mix-blend-luminosity opacity-80 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500"
-                />
-
-                {/* Optics blend layers */}
-                <div className="absolute inset-0 bg-accent/20 mix-blend-color z-10 pointer-events-none transition-colors duration-500" />
-                <div className="absolute inset-0 bg-bg/10 mix-blend-multiply z-10 pointer-events-none" />
-                
-                {/* Scanning line animation */}
-                <motion.div 
-                  className="absolute top-0 left-0 w-full h-1 bg-accent/50 blur-[2px] z-20 pointer-events-none"
-                  animate={{ y: ["0%", "400%"] }}
-                  transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-                />
-
-                {/* Target Overlay Button */}
-                <motion.button 
-                  className="absolute top-6 left-6 z-50 p-2 border border-accent bg-bg/80 text-accent hover:bg-dbh-active hover:text-white transition-colors flex items-center group/btn outline-none shadow-[0_0_10px_rgba(0,0,0,0.5)] clip-notch-sm"
-                  onClick={() => setShowDataOverlay(!showDataOverlay)}
-                  aria-label="Toggle Telemetry Overlay"
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ repeat: Infinity, duration: 0.15, repeatDelay: 2, ease: "linear" }}
-                >
-                  <ChevronRight size={14} className={`transform transition-transform ${showDataOverlay ? 'rotate-90' : ''}`} />
-                </motion.button>
-
-                {/* Telemetry Data Overlay (Interactive Screen) */}
-                <AnimatePresence>
-                  {showDataOverlay && (
-                    <motion.div 
-                      initial={{ opacity: 0, clipPath: 'inset(100% 0 0 0)', backdropFilter: "blur(0px)" }}
-                      animate={{ opacity: 1, clipPath: 'inset(0% 0 0 0)', backdropFilter: "blur(16px)" }}
-                      exit={{ opacity: 0, clipPath: 'inset(0% 0 100% 0)', backdropFilter: "blur(0px)" }}
-                      transition={{ duration: 0.4, ease: "anticipate" }}
-                      className="absolute inset-0 z-20 bg-surface/80 border border-border flex flex-col p-6 pt-20 font-tertiary text-[10px]"
-                    >
-                      <div className="flex flex-col h-full justify-start gap-4">
-                        
-                        {/* Top Section (Geo-Data) */}
-                        <div className="flex flex-col gap-2 group/loc">
-                          <div className="flex flex-col gap-1 text-main transition-colors">
-                            <div className="flex items-center gap-2">
-                              <MapPin size={14} className="text-accent shrink-0" />
-                              <span className="uppercase text-xs tracking-widest whitespace-nowrap">LOC: Colombo</span>
-                              
-                              {/* Dedicated Status Blinker */}
-                              <div className="ml-2 flex items-center gap-2 shrink-0">
-                                <div className="w-1.5 h-1.5 bg-[#00ff41] animate-pulse rounded-none" />
-                                <span className="text-[#00ff41] opacity-80 uppercase tracking-widest text-[9px]">ACTIVE</span>
-                              </div>
-                            </div>
-                            <span className="font-tertiary text-muted/70 pl-6 text-[9px] whitespace-nowrap group-hover/loc:text-accent transition-colors">[ 6.9271° N, 79.8612° E ]</span>
-                          </div>
-
-                          {/* Dedicated Map Expand Button */}
-                          <div className="pl-6 mt-1">
-                            <button 
-                              onClick={() => setIsMapExpanded(!isMapExpanded)}
-                              className="flex items-center justify-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/30 text-accent hover:bg-accent hover:text-bg transition-colors text-[9px] tracking-widest font-tertiary shadow-[0_0_10px_rgba(var(--color-accent),0.1)] w-max reticle-sm"
-                            >
-                              <ScanLine size={10} className="animate-pulse" />
-                              {isMapExpanded ? "COLLAPSE" : "SCAN"}
-                            </button>
-                          </div>
-                        
-                          {/* Geo-Location Map Expandable */}
-                          <AnimatePresence>
-                            {isMapExpanded && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "120px", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full overflow-hidden border border-accent/50 mt-2"
-                              >
-                                <iframe 
-                                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126743.58585978168!2d79.77380315264878!3d6.921922084534571!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae253d10f7a7003%3A0x320b2e4d32d3838d!2sColombo%2C%20Sri%20Lanka!5e0!3m2!1sen!2sus!4v1717800000000!5m2!1sen!2sus" 
-                                  width="100%" 
-                                  height="100%" 
-                                  style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg) grayscale(80%)' }} 
-                                  allowFullScreen="" 
-                                  loading="lazy" 
-                                  referrerPolicy="no-referrer-when-downgrade"
-                                  title="Colombo Geo-Location Uplink"
-                                />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                        
-                        {/* Divider */}
-                        <div className="w-full border-t border-dashed border-accent/40" />
-                        
-                        {/* Bottom Section (Comm-Links) in Grid */}
-                        <div className="grid grid-cols-2 gap-2 uppercase mt-2">
-                          {[
-                            { id: 'EMAIL', icon: <IconGmail size={14} />, href: 'mailto:varosaran@gmail.com' },
-                            { id: 'GITHUB', icon: <IconGitHub size={14} />, href: 'https://github.com/vathsaran' },
-                            { id: 'LINKEDIN', icon: <IconLinkedIn size={14} />, href: 'https://linkedin.com/in/vathsaran' },
-                            { id: 'X_TWITTER', icon: <IconX size={14} />, href: 'https://twitter.com/vathsaran' },
-                            { id: 'WEBSITE', icon: <Globe size={14} />, href: 'https://vathsaran.com' }
-                          ].map((social, idx) => (
-                            <a 
-                              key={idx}
-                              href={social.href} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className={`group/link flex items-center justify-center p-2 border border-border/40 bg-surface/20 hover:bg-surface hover:border-accent/50 transition-all duration-300 relative overflow-hidden cursor-pointer reticle-sm ${social.id === 'WEBSITE' ? 'col-span-2' : ''}`}
-                            >
-                              <div className="flex items-center justify-center w-full text-muted group-hover/link:text-accent transition-colors z-10 relative gap-2">
-                                <span className="text-accent/70 group-hover/link:text-accent">{social.icon}</span>
-                                <span className="tracking-widest text-[9px]">{social.id}</span>
-                              </div>
-                              {/* Glitch hover bg effect */}
-                              <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover/link:opacity-100 transition-opacity pointer-events-none" />
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
+            {IdentityCard}
           </motion.div>
 
           {/* Right Column (Terminal Boot, Title, Bio, Action Buttons) */}
@@ -329,6 +348,47 @@ const Hero = () => {
 
         </motion.div>
       </div>
+
+      {/* Telemetry Mobile Side Drawer */}
+      <AnimatePresence>
+        {isMobileDrawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="fixed inset-0 bg-bg/80 backdrop-blur-sm z-[60] md:hidden"
+              onClick={() => setIsMobileDrawerOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: "tween", ease: "anticipate", duration: 0.4 }}
+              className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-surface/90 border-l border-border z-[70] flex flex-col p-4 md:hidden overflow-y-auto backdrop-blur-xl pb-24"
+            >
+              <div className="flex justify-between items-center mb-6 border-b border-border/50 pb-4">
+                <span className="text-accent font-tertiary text-xs tracking-widest uppercase flex items-center gap-2">
+                  <Fingerprint size={14} />
+                  ID_CORE // TELEMETRY
+                </span>
+                <button 
+                  onClick={() => setIsMobileDrawerOpen(false)} 
+                  className="p-2 text-muted hover:text-accent border border-transparent hover:border-accent/30 bg-bg/50 transition-colors reticle-sm"
+                >
+                   <IconX size={16} />
+                </button>
+              </div>
+              
+              <div className="flex-1 flex flex-col">
+                {IdentityCard}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Terminal, Activity } from 'lucide-react';
+import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import DecryptedText from './DecryptedText';
 
 const navNodes = [
-  { id: 'ID_CORE', label: '[ 01 ] // ID_CORE' },
-  { id: 'SYS_ARCH', label: '[ 02 ] // SYS_ARCH' },
-  { id: 'DATA_BNK', label: '[ 03 ] // DATA_BNK' },
-  { id: 'OPS_LOG', label: '[ 04 ] // OPS_LOG' },
-  { id: 'COM_LNK', label: '[ 05 ] // COM_LNK' }
+  { id: 'ID_CORE', label: '[ 01 ] // ID_CORE', icon: Fingerprint },
+  { id: 'SYS_ARCH', label: '[ 02 ] // SYS_ARCH', icon: Terminal },
+  { id: 'DATA_BNK', label: '[ 03 ] // DATA_BNK', icon: Database },
+  { id: 'OPS_LOG', label: '[ 04 ] // OPS_LOG', icon: FolderGit2 },
+  { id: 'COM_LNK', label: '[ 05 ] // COM_LNK', icon: Mail }
 ];
 
 const GlobalLayout = ({ children }) => {
@@ -87,7 +87,7 @@ const GlobalLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full flex justify-center p-4 md:p-8 overflow-hidden relative selection:bg-accent selection:text-bg">
+    <div className="min-h-[100dvh] w-full flex justify-center p-0 md:p-4 lg:p-8 overflow-hidden relative selection:bg-accent selection:text-bg">
       {/* Background grid lines & Active Nodes */}
       <div className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-300" style={{ opacity: theme === 'light' ? 0.4 : 0.2 }}>
         <div className="w-full h-full" style={{
@@ -122,10 +122,10 @@ const GlobalLayout = ({ children }) => {
       </div>
 
       {/* Main HUD Container */}
-      <div className="w-full max-w-[1400px] border border-muted relative z-10 flex flex-col backdrop-blur-md transition-colors duration-300 shadow-2xl h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)]" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 40%, transparent)' }}>
+      <div className="w-full max-w-[1400px] border-x-0 md:border md:border-muted relative z-10 flex flex-col backdrop-blur-md transition-colors duration-300 shadow-2xl h-[100dvh] md:h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)]" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 40%, transparent)' }}>
         
         {/* Top Header Bar */}
-        <header className="border-b border-muted flex items-center justify-between px-4 py-2 text-xs font-tertiary text-muted shrink-0 relative overflow-hidden" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 80%, transparent)' }}>
+        <header className="border-b border-muted flex items-center justify-between px-4 pb-2 text-xs font-tertiary text-muted shrink-0 relative overflow-hidden" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 80%, transparent)', paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-4">
             <span className="text-accent flex items-center gap-2">
               <Terminal size={14} /> 
@@ -187,8 +187,8 @@ const GlobalLayout = ({ children }) => {
         {/* Sidebar + Content Grid */}
         <div className="flex flex-1 flex-col md:flex-row min-h-0">
           
-          {/* Left System Navigator (Sticky inside flex layout) */}
-          <nav className="w-full md:w-44 lg:w-48 border-b md:border-b-0 md:border-r border-muted flex flex-row md:flex-col items-center md:items-start p-4 md:pl-6 text-[10px] font-tertiary text-muted gap-4 md:gap-6 overflow-x-auto md:overflow-visible scrollbar-hide shrink-0 relative" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 60%, transparent)' }}>
+          {/* System Navigator (Left Sidebar Desktop / Bottom Dock Mobile) */}
+          <nav className="fixed bottom-0 inset-x-0 z-50 md:static md:w-44 lg:w-48 border-t md:border-t-0 md:border-r border-muted flex flex-row md:flex-col items-center md:items-start justify-around md:justify-start px-2 py-3 md:p-4 md:pl-6 text-[10px] font-tertiary text-muted md:gap-6 shrink-0 backdrop-blur-md md:backdrop-blur-none" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 85%, transparent)', paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
             
             {/* Active Wire Node Track (Desktop only) */}
             <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[1px] bg-border z-0" />
@@ -197,11 +197,12 @@ const GlobalLayout = ({ children }) => {
               <div className="hud-crosshair w-full max-w-[80px]" />
             </div>
 
-            <div className="flex flex-row md:flex-col gap-6 w-full mt-0 md:mt-4 items-start pl-2 md:pl-0 relative z-10">
+            <div className="flex flex-row md:flex-col gap-2 md:gap-6 w-full justify-around md:justify-start mt-0 md:mt-4 items-center md:items-start pl-0 md:pl-2 relative z-10">
               {navNodes.map((node) => {
                 const isActive = activeSection === node.id;
                 const isHovered = hoveredNode === node.id;
-                const labelText = node.label.replace('[ ', '').replace(' ]', ''); // Split out brackets
+                const labelText = node.label.replace('[ ', '').replace(' ]', '');
+                const Icon = node.icon;
                 
                 return (
                   <button
@@ -209,17 +210,30 @@ const GlobalLayout = ({ children }) => {
                     onClick={() => scrollToSection(node.id)}
                     onMouseEnter={() => setHoveredNode(node.id)}
                     onMouseLeave={() => setHoveredNode(null)}
-                    className={`group relative flex items-center text-left whitespace-nowrap transition-all duration-300 outline-none uppercase tracking-widest ${isActive ? 'reticle-nav reticle-active opacity-100 text-accent font-bold' : 'opacity-40 text-main hover:opacity-100 hover:text-accent'}`}
+                    className={`group relative flex flex-col md:flex-row items-center md:items-center text-center md:text-left transition-all duration-300 outline-none uppercase tracking-widest ${isActive ? 'reticle-nav md:reticle-active opacity-100 text-accent font-bold' : 'opacity-60 md:opacity-40 text-main hover:opacity-100 hover:text-accent'}`}
                   >
-                    <span className={`inline-block transition-transform duration-300 ${isActive ? '-translate-x-1 opacity-0' : 'group-hover:-translate-x-1 opacity-100'}`}>[</span>
-                    <span className="mx-2 min-w-[80px]">
-                      {isHovered && !isActive ? (
-                        <DecryptedText text={labelText} speed={60} maxIterations={10} animateOn="view" />
-                      ) : (
-                        labelText
-                      )}
+                    {/* Desktop Hover Brackets */}
+                    <span className={`hidden md:inline-block transition-transform duration-300 ${isActive ? '-translate-x-1 opacity-0' : 'group-hover:-translate-x-1 opacity-100'}`}>[</span>
+                    
+                    {/* Mobile Icon */}
+                    <Icon size={20} strokeWidth={1.5} className={`mb-1 md:hidden transition-colors ${isActive ? 'text-accent' : ''}`} />
+                    
+                    <span className="md:mx-2 min-w-auto md:min-w-[80px] text-[8px] md:text-[10px]">
+                      {/* Mobile Label */}
+                      <span className="md:hidden opacity-80">{node.id.split('_')[0]}</span>
+                      
+                      {/* Desktop Label */}
+                      <span className="hidden md:inline-block">
+                        {isHovered && !isActive ? (
+                          <DecryptedText text={labelText} speed={60} maxIterations={10} animateOn="view" />
+                        ) : (
+                          labelText
+                        )}
+                      </span>
                     </span>
-                    <span className={`inline-block transition-transform duration-300 ${isActive ? 'translate-x-1 opacity-0' : 'group-hover:translate-x-1 opacity-100'}`}>]</span>
+                    
+                    {/* Desktop Hover Brackets */}
+                    <span className={`hidden md:inline-block transition-transform duration-300 ${isActive ? 'translate-x-1 opacity-0' : 'group-hover:translate-x-1 opacity-100'}`}>]</span>
                   </button>
                 );
               })}
@@ -227,19 +241,21 @@ const GlobalLayout = ({ children }) => {
           </nav>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth" id="scroll-container">
-            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-accent -translate-x-[1px] -translate-y-[1px] pointer-events-none z-50" />
-            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-accent translate-x-[1px] -translate-y-[1px] pointer-events-none z-50" />
+          <main className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth pb-24 md:pb-0" id="scroll-container">
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-accent -translate-x-[1px] -translate-y-[1px] pointer-events-none z-50 hidden md:block" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-accent translate-x-[1px] -translate-y-[1px] pointer-events-none z-50 hidden md:block" />
             
             {children}
             
             {/* Footer Bar inside main content */}
-            <footer className="border-t border-muted p-4 mt-16 text-xs font-tertiary text-muted flex justify-between items-center relative overflow-hidden" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 80%, transparent)' }}>
+            <footer className="border-t border-muted p-4 mt-16 text-[10px] md:text-xs font-tertiary text-muted flex justify-between items-center relative overflow-hidden" style={{ backgroundColor: 'color-mix(in srgb, var(--color-bg) 80%, transparent)' }}>
               <span className="flex items-center gap-2 group cursor-default">
                 <span className="group-hover:anim-glitch-label transition-colors duration-300">END OF TRANSMISSION</span>
               </span>
-              <span className="bracket-hover text-accent cursor-pointer flex items-center group" onClick={() => scrollToSection('ID_CORE')}>
-                [ VERIFY_LOG ] <span className="inline-block w-2 h-3 bg-accent ml-2 animate-pulse group-hover:bg-main transition-colors" />
+              <span className="bracket-hover text-accent cursor-pointer flex items-center group text-right" onClick={() => scrollToSection('ID_CORE')}>
+                <span className="hidden md:inline">[ VERIFY_LOG ]</span>
+                <span className="md:hidden">[ TOP ]</span>
+                <span className="inline-block w-2 h-3 bg-accent ml-2 animate-pulse group-hover:bg-main transition-colors" />
               </span>
               
               {/* Constant Transmission Strip */}

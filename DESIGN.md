@@ -40,3 +40,10 @@ Use modern OKLCH for precise contrast. The theme relies on stark monochromes wit
 - **No Bouncy Animations:** Transitions should be linear, sharp, and fast (e.g., `transition-timing-function: cubic-bezier(0, 0, 0.2, 1)`, duration `150ms` to `200ms`).
 - **Hover States:** Instead of scaling buttons up, use "targeting" effects. On hover, apply a `1px` electric blue border, bracket the text with `[ ]`, or slide a solid 2px line underneath the element.
 - **Active States:** Active menu items should have a solid or subtly striped background fill of the Accent Color, with text reversed out (e.g., black text on cyan background).
+
+## 6. SPECIFIC DBH COMPONENTS (v1.0 IMPLEMENTATION)
+- **Targeting Reticles:** The global `reticle-sm` and `reticle-lg` CSS classes provide automated, 4-corner bracket framing to UI elements, specifically expanding inward on hover to emulate targeting locks.
+- **Terminal Decryption:** The `[ DecryptedText ]` component handles cryptographic letter randomization on mount, giving text an authentic "loading from mainframe" aesthetic.
+- **Hardware Switches:** Toggles (like the Theme optics switch) emulate physical sliders. They feature a defined inner track and a heavy, shadowed accent block that slides via precise spring physics, exposing internal `DRK`/`LGT` text.
+- **Segmented Power Bars:** Progress meters (like the Skills Loadout) are segmented into individual lit blocks with empty ghost blocks behind them, replicating physical LCD diagnostic readouts instead of generic solid lines.
+- **Monogram Branding:** The core identity (Favicon/Logo) is a brutalist, strictly geometric "VY" SVG monogram avoiding all curves, enforcing the corporate-technical vibe.
