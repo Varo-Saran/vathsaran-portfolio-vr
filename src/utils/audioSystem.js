@@ -5,27 +5,55 @@ class AudioEngine {
     this.isInitialized = false;
   }
 
-  init() {
-    if (typeof window === 'undefined') return;
+  async init() {
+    if (typeof window === 'undefined') return false;
     
     if (!this.ctx) {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      this.ctx = new AudioContext();
+      if (!AudioContext) {
+        console.warn("[AudioSystem] Web Audio API not supported in this browser.");
+        return false;
+      }
+      try {
+        this.ctx = new AudioContext();
+        console.log("[AudioSystem] AudioContext created. State:", this.ctx.state);
+      } catch (e) {
+        console.error("[AudioSystem] Failed to create AudioContext:", e);
+        return false;
+      }
     }
     
     if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      try {
+        console.log("[AudioSystem] Attempting to resume suspended context...");
+        await this.ctx.resume();
+        console.log("[AudioSystem] Context resumed successfully. State:", this.ctx.state);
+      } catch (e) {
+        console.warn("[AudioSystem] Could not resume context. Blocked by autoplay policy.", e);
+        return false;
+      }
     }
+    
     this.isInitialized = true;
+    return true;
   }
 
   // Heavy mechanical clack + electric surge
-  playThemeSwitch() {
+  async playThemeSwitch() {
     if (!this.enabled) return;
-    this.init();
-    if (!this.ctx) return;
     
+    const ready = await this.init();
+    if (!ready || !this.ctx) {
+      console.warn("[AudioSystem] Theme switch aborted: Engine not ready.");
+      return;
+    }
+    
+    if (this.ctx.state !== 'running') {
+      console.warn("[AudioSystem] Theme switch aborted: Context state is", this.ctx.state);
+      return;
+    }
+    
+    console.log("[AudioSystem] Playing Theme Switch sound...");
     try {
       const t = this.ctx.currentTime;
       
@@ -71,20 +99,27 @@ class AudioEngine {
       osc.start(t);
       osc.stop(t + 0.3);
     } catch(e) {
-      console.warn("Audio play failed", e);
+      console.error("[AudioSystem] Theme switch audio play failed:", e);
     }
   }
 
   // Low bass sweep up + high-tech trill
-  playBootSound() {
+  async playBootSound() {
     if (!this.enabled) return;
-    this.init();
-    if (!this.ctx) return;
     
-    // If the browser blocked autoplay, the context remains suspended.
-    // We MUST return here so we don't queue up sounds that will explode later.
-    if (this.ctx.state === 'suspended') return;
+    console.log("[AudioSystem] Attempting to play Boot Sound...");
+    const ready = await this.init();
+    if (!ready || !this.ctx) {
+      console.warn("[AudioSystem] Boot sound aborted: Engine not ready (Likely blocked by browser autoplay policy on initial load).");
+      return;
+    }
     
+    if (this.ctx.state !== 'running') {
+      console.warn("[AudioSystem] Boot sound aborted: Context state is", this.ctx.state);
+      return;
+    }
+    
+    console.log("[AudioSystem] Playing Boot sound...");
     try {
       const t = this.ctx.currentTime;
 
@@ -128,15 +163,18 @@ class AudioEngine {
         trillTime += 0.05 + Math.random() * 0.05; // Random interval
       }
     } catch(e) {
-      console.warn("Audio play failed", e);
+      console.error("[AudioSystem] Boot sound play failed:", e);
     }
   }
 
   // Very subtle blip
-  playHover() {
+  async playHover() {
     if (!this.enabled) return;
-    this.init();
-    if (!this.ctx) return;
+    
+    const ready = await this.init();
+    if (!ready || !this.ctx) return;
+    
+    if (this.ctx.state !== 'running') return;
     
     try {
       const t = this.ctx.currentTime;
