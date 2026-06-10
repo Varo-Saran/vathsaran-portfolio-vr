@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2, Sun, Moon, Cloud, CloudRain, CloudLightning, CloudSnow, CloudFog, MapPin, Clock, Route, Crosshair, Battery, Cpu } from 'lucide-react';
+import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2, Sun, Moon, Cloud, CloudRain, CloudLightning, CloudSnow, CloudFog, MapPin, Clock, Route, Crosshair, Battery, Cpu, Volume2, VolumeX } from 'lucide-react';
 import { motion } from 'motion/react';
 import DecryptedText from './DecryptedText';
 import StickyTerminal from './StickyTerminal';
@@ -37,6 +37,16 @@ const GlobalLayout = ({ children }) => {
   const [uptime, setUptime] = useState(0);
   const [battery, setBattery] = useState(null);
   const [osInfo, setOsInfo] = useState('UNKNOWN_OS');
+  const [isMuted, setIsMuted] = useState(!audioSystem.enabled);
+
+  const toggleMute = () => {
+    const nextMute = !isMuted;
+    setIsMuted(nextMute);
+    audioSystem.enabled = !nextMute;
+    if (!nextMute) {
+      audioSystem.playKeystroke();
+    }
+  };
 
   // Load theme preference on mount
 
@@ -258,7 +268,7 @@ const GlobalLayout = ({ children }) => {
           <div className="flex items-center gap-4">
             <span className="text-accent hidden md:flex items-center gap-2">
               <Terminal size={14} /> 
-              <DecryptedText text="SYS.BOOT // PORTFOLIO" speed={40} animateOnMount />
+              <DecryptedText text="SYS. PORTFOLIO" speed={40} animateOnMount />
             </span>
             
             {/* Mobile Telemetry */}
@@ -332,6 +342,13 @@ const GlobalLayout = ({ children }) => {
               </div>
             </div>
             
+            <button 
+              onClick={toggleMute}
+              className="group flex items-center gap-2 text-[10px] font-tertiary text-muted hover:text-accent transition-colors outline-none mr-2 md:mr-0"
+              title="Toggle Audio"
+            >
+              {isMuted ? <VolumeX size={14} className="text-red-500" /> : <Volume2 size={14} />}
+            </button>
             <button 
               onClick={toggleTheme}
               className="group flex items-center gap-4 text-[10px] font-tertiary text-muted transition-colors outline-none"
