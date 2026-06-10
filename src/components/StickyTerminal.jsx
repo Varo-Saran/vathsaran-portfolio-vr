@@ -50,7 +50,7 @@ const StickyTerminal = () => {
   return (
     <>
       {/* Desktop Floating Button (Left Sidebar Bottom) */}
-      <div className={`hidden md:flex absolute bottom-8 left-12 z-50 transition-opacity duration-300 relative group reticle-sm inline-block ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`hidden md:flex absolute bottom-8 left-12 z-50 transition-opacity duration-300 group reticle-sm ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <motion.button 
           onClick={() => setIsOpen(true)}
           animate={{ y: [0, -10, 0] }}
