@@ -5,7 +5,7 @@ import InteractiveTerminal from './InteractiveTerminal';
 
 const StickyTerminal = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [vvpHeight, setVvpHeight] = useState('100dvh');
+  const [vvpStyle, setVvpStyle] = useState({ height: '100dvh', top: 0 });
 
   // Lock body scroll when terminal is open
   useEffect(() => {
@@ -31,11 +31,10 @@ const StickyTerminal = () => {
     if (!window.visualViewport) return;
     
     const updateVvp = () => {
-      setVvpHeight(`${window.visualViewport.height}px`);
-      // Scroll to top of window to avoid keyboard offset bugs on iOS
-      if (isOpen && document.body.style.position === 'fixed') {
-        window.scrollTo(0, 0);
-      }
+      setVvpStyle({
+        height: `${window.visualViewport.height}px`,
+        top: `${window.visualViewport.offsetTop}px`
+      });
     };
 
     window.visualViewport.addEventListener('resize', updateVvp);
@@ -50,7 +49,7 @@ const StickyTerminal = () => {
 
   return (
     <>
-      {/* Desktop Floating Button */}
+      {/* Desktop Floating Button (Left Sidebar Bottom) */}
       <motion.button 
         onClick={() => setIsOpen(true)}
         animate={{ y: [0, -10, 0] }}
@@ -60,7 +59,7 @@ const StickyTerminal = () => {
         <TerminalSquare size={24} />
       </motion.button>
 
-      {/* Mobile Floating Action Button */}
+      {/* Mobile Floating Action Button (Bottom Right above Nav) */}
       <motion.button 
         onClick={() => setIsOpen(true)}
         animate={{ y: [0, -5, 0] }}
@@ -73,27 +72,27 @@ const StickyTerminal = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
+            {/* Mobile Backdrop to catch clicks and dim background completely */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-bg/80 backdrop-blur-sm z-[65] cursor-pointer"
+              className="fixed inset-0 bg-bg/80 backdrop-blur-sm z-[65] cursor-pointer md:hidden"
             />
             
             {/* --- MOBILE SAFE CONTAINER --- */}
             <div 
-              className="fixed top-0 left-0 w-full z-[70] p-2 flex flex-col justify-center pointer-events-none md:hidden"
-              style={{ height: vvpHeight }}
+              className="fixed left-0 w-full z-[70] p-2 flex flex-col justify-end pointer-events-none md:hidden"
+              style={{ height: vvpStyle.height, top: vvpStyle.top }}
             >
               <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 className="w-full bg-bg border border-border shadow-[0_0_40px_rgba(0,0,0,0.8)] flex flex-col pointer-events-auto max-h-full"
               >
-                {/* Header */}
+                {/* Header matching RAW_DATA_STREAM aesthetic */}
                 <div className="w-full px-4 py-3 bg-bg border-b border-border flex items-center justify-between z-20 shrink-0">
                   <span className="text-[10px] font-tertiary tracking-widest text-accent flex items-center gap-2">
                     <TerminalSquare size={14} /> [ COMMAND_TERMINAL ]
@@ -105,12 +104,12 @@ const StickyTerminal = () => {
                     </button>
                   </div>
                 </div>
-                
-                {/* Scanner */}
+
+                {/* Scanning Laser Effect */}
                 <div className="absolute top-[41px] left-0 w-full h-[2px] bg-accent shadow-[0_0_15px_rgba(var(--color-accent),1)] z-10 anim-scan-vertical pointer-events-none opacity-50" />
 
-                {/* Content */}
-                <div className="p-4 relative flex-1 min-h-[40vh] max-h-[60vh] flex flex-col overflow-hidden">
+                {/* Terminal Content */}
+                <div className="p-4 bg-transparent relative h-[300px] shrink flex flex-col overflow-hidden">
                   <InteractiveTerminal />
                 </div>
               </motion.div>
