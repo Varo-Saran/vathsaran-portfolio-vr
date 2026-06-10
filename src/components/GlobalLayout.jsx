@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2, Sun, Cloud, CloudRain, CloudLightning, CloudSnow, CloudFog } from 'lucide-react';
+import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2, Sun, Moon, Cloud, CloudRain, CloudLightning, CloudSnow, CloudFog, MapPin, Clock, Route, Crosshair } from 'lucide-react';
 import { motion } from 'motion/react';
 import DecryptedText from './DecryptedText';
 import StickyTerminal from './StickyTerminal';
@@ -141,8 +141,17 @@ const GlobalLayout = ({ children }) => {
     hour12: true
   }).format(new Date(time));
 
+  const colomboHour = parseInt(new Intl.DateTimeFormat('en-US', { 
+    timeZone: 'Asia/Colombo', 
+    hour: 'numeric', 
+    hourCycle: 'h23' 
+  }).format(new Date(time)), 10);
+  
+  const isDaytime = colomboHour >= 6 && colomboHour < 18;
+  const TimeIcon = isDaytime ? Sun : Moon;
+
   // Determine Weather Icon
-  let WeatherIcon = Sun;
+  let WeatherIcon = TimeIcon;
   if (weather) {
     const code = weather.weathercode;
     if (code >= 1 && code <= 3) WeatherIcon = Cloud;
@@ -203,18 +212,32 @@ const GlobalLayout = ({ children }) => {
             </span>
           </div>
           <div className="flex items-center gap-6">
-            <div className="hidden sm:flex items-center gap-3 text-[10px]">
-              <span className="flex items-center gap-2">
-                LOC: COLOMBO [ {formattedTime} ] // 
+            <div className="hidden sm:flex items-center gap-4 text-[10px]">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                  <MapPin size={12} className="text-accent" />
+                  LOC: COLOMBO
+                </span>
+                <span className="text-muted/40">//</span>
+                <span className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                  <TimeIcon size={12} className="text-accent" />
+                  [ {formattedTime} ]
+                </span>
+                <span className="text-muted/40">//</span>
                 {weather ? (
-                  <span className="text-accent flex items-center gap-1">
-                    {Math.round(weather.temperature)}°C <WeatherIcon size={12} strokeWidth={2.5} />
+                  <span className="flex items-center gap-1.5 text-accent opacity-80 hover:opacity-100 transition-opacity font-secondary">
+                    <WeatherIcon size={14} strokeWidth={2.5} />
+                    {Math.round(weather.temperature)}°C
                   </span>
                 ) : (
-                  <span>FETCHING WX...</span>
+                  <span className="opacity-80">FETCHING WX...</span>
                 )}
-                // {trackingStatus}
-              </span>
+                <span className="text-muted/40">//</span>
+                <span className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                  <Route size={12} className="text-accent" />
+                  {trackingStatus}
+                </span>
+              </div>
               {/* Micro-Diagnostic Ticker */}
               <div className="flex items-end gap-[2px] h-3 w-6 overflow-hidden">
                 {[1, 2, 3, 4, 5].map(i => (
