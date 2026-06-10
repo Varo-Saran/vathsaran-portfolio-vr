@@ -81,8 +81,10 @@ class AudioEngine {
     this.init();
     if (!this.ctx) return;
     
-    // Note: Autoplay policies might block this if user hasn't interacted with page yet.
-    // It will just fail silently or log a warning in console.
+    // If the browser blocked autoplay, the context remains suspended.
+    // We MUST return here so we don't queue up sounds that will explode later.
+    if (this.ctx.state === 'suspended') return;
+    
     try {
       const t = this.ctx.currentTime;
 
