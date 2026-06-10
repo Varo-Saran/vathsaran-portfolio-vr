@@ -1,5 +1,6 @@
 // Force HMR reload
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Fingerprint, Database, MapPin, Mail, Globe, ChevronRight, ScanLine, X } from 'lucide-react';
 import TerminalTypewriter from './TerminalTypewriter';
@@ -287,16 +288,19 @@ const Hero = () => {
       <div className="max-w-6xl relative z-10 w-full flex flex-col justify-center">
         
         {/* Sticky Edge Toggle Button for Mobile */}
-        <motion.button 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1.0, duration: 0.4 }}
-          className="md:hidden fixed right-0 top-1/3 -translate-y-1/2 z-[80] py-4 px-2 bg-surface/60 backdrop-blur-md border border-r-0 border-border/50 text-accent font-tertiary flex flex-col items-center gap-3 reticle-sm hover:bg-surface/80 transition-colors shadow-[0_0_15px_rgba(0,0,0,0.5)] rounded-l-md"
-          onClick={() => setIsMobileDrawerOpen(true)}
-        >
-          <Fingerprint size={16} className="animate-pulse opacity-80" />
-          <span className="[writing-mode:vertical-rl] text-[10px] tracking-widest uppercase opacity-80">Telemetry</span>
-        </motion.button>
+        {typeof document !== 'undefined' ? createPortal(
+          <motion.button 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.0, duration: 0.4 }}
+            className="md:hidden fixed right-0 top-1/3 -translate-y-1/2 z-[9999] py-4 px-2 bg-surface/60 backdrop-blur-md border border-r-0 border-border/50 text-accent font-tertiary flex flex-col items-center gap-3 reticle-sm hover:bg-surface/80 transition-colors shadow-[0_0_15px_rgba(0,0,0,0.5)] rounded-l-md"
+            onClick={() => setIsMobileDrawerOpen(true)}
+          >
+            <Fingerprint size={16} className="animate-pulse opacity-80" />
+            <span className="[writing-mode:vertical-rl] text-[10px] tracking-widest uppercase opacity-80">Telemetry</span>
+          </motion.button>,
+          document.body
+        ) : null}
 
         <motion.div layout className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
           
@@ -420,45 +424,48 @@ const Hero = () => {
       </div>
 
       {/* Telemetry Mobile Side Drawer */}
-      <AnimatePresence>
-        {isMobileDrawerOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              className="fixed inset-0 bg-bg/80 backdrop-blur-sm z-[60] md:hidden"
-              onClick={() => setIsMobileDrawerOpen(false)}
-            />
-            {/* Drawer */}
-            <motion.div 
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: "tween", ease: "anticipate", duration: 0.4 }}
-              className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-surface/90 border-l border-border z-[70] flex flex-col p-4 md:hidden overflow-y-auto backdrop-blur-xl pb-24"
-            >
-              <div className="flex justify-between items-center mb-6 border-b border-border/50 pb-4">
-                <span className="text-accent font-tertiary text-xs tracking-widest uppercase flex items-center gap-2">
-                  <Fingerprint size={14} />
-                  ID_CORE // TELEMETRY
-                </span>
-                <button 
-                  onClick={() => setIsMobileDrawerOpen(false)} 
-                  className="p-2 text-muted hover:text-accent border border-transparent hover:border-accent/30 bg-bg/50 transition-colors reticle-sm"
-                >
-                   <X size={16} />
-                </button>
-              </div>
-              
-              <div className="flex-1 flex flex-col">
-                {IdentityCardMobile}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {typeof document !== 'undefined' ? createPortal(
+        <AnimatePresence>
+          {isMobileDrawerOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }} 
+                className="fixed inset-0 bg-bg/80 backdrop-blur-sm z-[9998] md:hidden"
+                onClick={() => setIsMobileDrawerOpen(false)}
+              />
+              {/* Drawer */}
+              <motion.div 
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: "tween", ease: "anticipate", duration: 0.4 }}
+                className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-surface/90 border-l border-border z-[9999] flex flex-col p-4 md:hidden overflow-y-auto backdrop-blur-xl pb-24"
+              >
+                <div className="flex justify-between items-center mb-6 border-b border-border/50 pb-4">
+                  <span className="text-accent font-tertiary text-xs tracking-widest uppercase flex items-center gap-2">
+                    <Fingerprint size={14} />
+                    ID_CORE // TELEMETRY
+                  </span>
+                  <button 
+                    onClick={() => setIsMobileDrawerOpen(false)} 
+                    className="p-2 text-muted hover:text-accent border border-transparent hover:border-accent/30 bg-bg/50 transition-colors reticle-sm"
+                  >
+                     <X size={16} />
+                  </button>
+                </div>
+                
+                <div className="flex-1 flex flex-col">
+                  {IdentityCardMobile}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      ) : null}
     </section>
   );
 };
