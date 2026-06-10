@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TerminalSquare, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import InteractiveTerminal from './InteractiveTerminal';
+import { audioSystem } from '../utils/audioSystem';
 
 const StickyTerminal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,6 +54,7 @@ const StickyTerminal = () => {
       <div className={`hidden md:flex absolute bottom-8 left-12 z-50 transition-opacity duration-300 group reticle-sm ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <motion.button 
           onClick={() => setIsOpen(true)}
+          onMouseEnter={() => audioSystem.playHover()}
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className={`p-4 bg-surface/80 backdrop-blur-md border border-accent text-accent group-hover:bg-accent group-hover:text-bg transition-colors shadow-[0_0_15px_rgba(var(--color-accent),0.3)] clip-notch block w-full h-full`}
@@ -64,6 +66,7 @@ const StickyTerminal = () => {
       {/* Mobile Floating Action Button (Bottom Right above Nav) */}
       <motion.button 
         onClick={() => setIsOpen(true)}
+        onMouseEnter={() => audioSystem.playHover()}
         animate={{ y: [0, -5, 0] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         className={`flex md:hidden absolute bottom-24 right-4 z-[60] p-3 bg-surface/80 backdrop-blur-md border border-accent/50 text-accent hover:bg-accent hover:text-bg transition-colors shadow-[0_0_15px_rgba(var(--color-accent),0.3)] clip-notch-sm ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}

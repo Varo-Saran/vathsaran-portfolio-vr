@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight } from 'lucide-react';
 import DecryptedText from './DecryptedText';
+import { audioSystem } from '../utils/audioSystem';
 
 const projects = [
   {
@@ -200,6 +201,7 @@ const ProjectsBank = () => {
                 key={project.id} 
                 className="group border-b border-border last:border-b-0 hover:bg-border/20 transition-colors reticle-md"
                 onClick={() => toggleExpand(project.id)}
+                onMouseEnter={() => audioSystem.playHover()}
               >
                 {/* Main Row */}
                 <div className={`grid grid-cols-12 gap-4 p-4 items-center transition-all duration-300 ${isExpanded ? 'bg-dbh-active clip-notch shadow-[0_0_15px_rgba(19,56,87,0.5)]' : 'group-hover:bg-dbh-hover group-hover:clip-notch'}`}>

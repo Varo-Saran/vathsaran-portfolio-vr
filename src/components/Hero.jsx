@@ -8,6 +8,7 @@ import IconX from './IconX';
 import IconLinkedIn from './IconLinkedIn';
 import IconGitHub from './IconGitHub';
 import IconGmail from './IconGmail';
+import { audioSystem } from '../utils/audioSystem';
 
 import identityScan from '../assets/identity-scan.jpeg';
 
@@ -115,6 +116,7 @@ const Hero = () => {
         <div className="pl-6 mt-1">
           <button 
             onClick={() => setIsMapExpanded(!isMapExpanded)}
+            onMouseEnter={() => audioSystem.playHover()}
             className="flex items-center justify-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/30 text-accent hover:bg-accent hover:text-bg transition-colors text-[9px] tracking-widest font-tertiary shadow-[0_0_10px_rgba(var(--color-accent),0.1)] w-max reticle-sm"
           >
             <ScanLine size={10} className="animate-pulse" />
@@ -163,7 +165,8 @@ const Hero = () => {
             key={idx}
             href={social.href} 
             target="_blank" 
-            rel="noreferrer" 
+            rel="noreferrer"
+            onMouseEnter={() => audioSystem.playHover()}
             className={`group/link flex items-center justify-center p-2 border border-border/40 bg-surface/20 hover:bg-surface hover:border-accent/50 transition-all duration-300 relative overflow-hidden cursor-pointer reticle-sm ${social.id === 'WEBSITE' ? 'col-span-2' : ''}`}
           >
             <div className="flex items-center justify-center w-full text-muted group-hover/link:text-accent transition-colors z-10 relative gap-2">
@@ -206,6 +209,7 @@ const Hero = () => {
         <motion.button 
           className="absolute top-6 left-6 z-50 p-2 border border-accent bg-bg/80 text-accent hover:bg-dbh-active hover:text-white transition-colors flex items-center group/btn outline-none shadow-[0_0_10px_rgba(0,0,0,0.5)] clip-notch-sm"
           onClick={() => setShowDataOverlay(!showDataOverlay)}
+          onMouseEnter={() => audioSystem.playHover()}
           aria-label="Toggle Telemetry Overlay"
           animate={{ x: [0, 4, 0] }}
           transition={{ repeat: Infinity, duration: 0.15, repeatDelay: 2, ease: "linear" }}
@@ -427,12 +431,12 @@ const Hero = () => {
               transition={{ delay: 1.4, duration: 0.2 }}
               className="flex flex-wrap gap-4 mt-8"
             >
-              <button className="relative group reticle-lg outline-none border border-transparent" onClick={() => document.getElementById('COM_LNK')?.scrollIntoView({ behavior: 'smooth' })}>
+              <button className="relative group reticle-lg outline-none border border-transparent" onClick={() => document.getElementById('COM_LNK')?.scrollIntoView({ behavior: 'smooth' })} onMouseEnter={() => audioSystem.playHover()}>
                 <div className="bg-accent text-bg font-primary uppercase tracking-widest text-sm px-6 py-3 group-hover:bg-dbh-active group-hover:text-white transition-colors duration-200 flex items-center gap-2 clip-notch w-full h-full">
                   <span className="font-tertiary group-hover:text-white/60">#</span> INITIATE_CONTACT
                 </div>
               </button>
-              <a href="/CV_Vathsaran_Yasotharan.pdf" target="_blank" rel="noreferrer" className="relative group reticle-lg outline-none block">
+              <a href="/CV_Vathsaran_Yasotharan.pdf" target="_blank" rel="noreferrer" className="relative group reticle-lg outline-none block" onMouseEnter={() => audioSystem.playHover()}>
                 <div className="border border-accent/50 bg-surface/50 text-accent font-primary uppercase tracking-widest text-sm px-6 py-3 group-hover:bg-dbh-active group-hover:text-white group-hover:border-transparent transition-colors duration-200 flex items-center gap-2 clip-notch w-full h-full">
                   DOWNLOAD_DATASET [CV]
                 </div>
