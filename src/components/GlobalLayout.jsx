@@ -248,7 +248,7 @@ const GlobalLayout = ({ children }) => {
           <div className="flex items-center gap-4">
             <span className="text-accent hidden md:flex items-center gap-2">
               <Terminal size={14} /> 
-              <DecryptedText text="SYS.BOOT" speed={40} animateOnMount />
+              <DecryptedText text="SYS.BOOT // PORTFOLIO" speed={40} animateOnMount />
             </span>
             
             {/* Mobile Telemetry */}
