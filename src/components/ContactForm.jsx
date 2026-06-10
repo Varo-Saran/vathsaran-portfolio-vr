@@ -7,6 +7,7 @@ import IconX from './IconX';
 import IconLinkedIn from './IconLinkedIn';
 import IconGitHub from './IconGitHub';
 import IconGmail from './IconGmail';
+import { audioSystem } from '../utils/audioSystem';
 
 // Utility to generate random hex string
 const generateHex = (length) => {
@@ -59,6 +60,8 @@ const ContactForm = () => {
     const form = e.target;
     const data = new FormData(form);
     
+    audioSystem.playUplinkEstablished();
+    
     fetch(form.action, {
       method: form.method,
       body: data,
@@ -67,6 +70,7 @@ const ContactForm = () => {
       }
     }).then(response => {
       if (response.ok) {
+        audioSystem.playPayloadDelivered();
         setStatus("SUCCESS");
         form.reset();
       } else {
@@ -124,7 +128,10 @@ const ContactForm = () => {
                 const inner = (
                   <div 
                     className="group flex flex-col p-4 border border-border/50 bg-surface/30 hover:bg-surface hover:border-accent/50 transition-all duration-300 relative cursor-pointer h-[80px] justify-between reticle-sm"
-                    onMouseEnter={() => setHoveredSocial(social.id)}
+                    onMouseEnter={() => {
+                      setHoveredSocial(social.id);
+                      audioSystem.playHover();
+                    }}
                     onMouseLeave={() => setHoveredSocial(null)}
                   >
                     {/* Brackets logic */}
@@ -208,7 +215,10 @@ const ContactForm = () => {
               </div>
               <button 
                 type="submit"
-                onMouseEnter={() => setIsHovered(true)}
+                onMouseEnter={() => {
+                  setIsHovered(true);
+                  audioSystem.playHover();
+                }}
                 onMouseLeave={() => setIsHovered(false)}
                 className="bg-accent text-bg font-primary uppercase tracking-widest text-sm px-8 py-4 hover:bg-main hover:text-bg transition-colors duration-200 flex items-center gap-2 border border-transparent reticle-lg min-w-[240px] justify-center"
               >

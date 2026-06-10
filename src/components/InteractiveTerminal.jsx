@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, User, FileText, Mail, Activity, Database, MapPin, AlertCircle } from 'lucide-react';
+import { audioSystem } from '../utils/audioSystem';
 
 const bootSequence = [
   "SECURE TERMINAL UPLINK ESTABLISHED.",
@@ -48,6 +49,7 @@ const InteractiveTerminal = () => {
 
       switch (cmd) {
         case 'help':
+          audioSystem.playTerminalSuccess();
           outputNode = (
             <div className="flex flex-col gap-1">
               <span className="text-accent font-bold"><Terminal size={12} className="inline mr-1 mb-0.5"/> COMMAND LIST:</span>
@@ -62,6 +64,7 @@ const InteractiveTerminal = () => {
           );
           break;
         case 'whoami':
+          audioSystem.playTerminalSuccess();
           outputNode = (
             <div className="flex flex-col">
               <span><User size={12} className="inline text-accent mr-1"/> Identity: <span className="text-main">Vathsaran Yasotharan</span></span>
@@ -72,21 +75,26 @@ const InteractiveTerminal = () => {
           );
           break;
         case 'status':
+          audioSystem.playTerminalSuccess();
           outputNode = <span><Activity size={12} className="inline text-green-500 mr-1 mb-0.5"/> SYSTEM OPTIMAL. All deployed ML nodes active and responsive.</span>;
           break;
         case 'projects':
+          audioSystem.playTerminalSuccess();
           outputNode = <span><Database size={12} className="inline text-accent mr-1 mb-0.5"/> Accessing Data Bank... 5 records found. Refer to [ 03 // DATA_BNK ] for payload.</span>;
           break;
         case 'location':
+          audioSystem.playTerminalSuccess();
           outputNode = <span><MapPin size={12} className="inline text-accent mr-1 mb-0.5"/> HOST LOC: <span className="text-main">COLOMBO, SRI LANKA</span>. Coordinates securely locked.</span>;
           break;
         case 'contact':
+          audioSystem.playTerminalSuccess();
           outputNode = <span><Mail size={12} className="inline text-accent mr-1 mb-0.5"/> Initiating secure mailto protocol... <span className="text-main">[ varosaran@gmail.com ]</span></span>;
           setTimeout(() => {
             window.location.href = 'mailto:varosaran@gmail.com';
           }, 500);
           break;
         case 'download cv':
+          audioSystem.playTerminalSuccess();
           outputNode = <span><FileText size={12} className="inline text-accent mr-1 mb-0.5"/> Accessing secure payload <span className="text-main">[ vathsaran_cv.pdf ]</span>... Payload delivered.</span>;
           const link = document.createElement('a');
           link.href = '/vathsaran_cv.pdf';
@@ -96,10 +104,12 @@ const InteractiveTerminal = () => {
           document.body.removeChild(link);
           break;
         case 'clear':
+          audioSystem.playTerminalSuccess();
           setHistory([]);
           setInput('');
           return;
         default:
+          audioSystem.playTerminalError();
           outputNode = <span><AlertCircle size={12} className="inline text-red-500 mr-1 mb-0.5"/> Command not recognized: <span className="text-main">{cmd}</span>.</span>;
       }
 
@@ -143,7 +153,10 @@ const InteractiveTerminal = () => {
             id="terminal-input"
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              audioSystem.playKeystroke();
+            }}
             onKeyDown={handleCommand}
             autoComplete="off"
             spellCheck="false"

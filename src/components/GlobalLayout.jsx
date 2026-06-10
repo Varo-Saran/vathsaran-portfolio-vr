@@ -150,7 +150,12 @@ const GlobalLayout = ({ children }) => {
         currentActive = navNodes[navNodes.length - 1].id;
       }
 
-      setActiveSection(currentActive);
+      setActiveSection((prev) => {
+        if (prev !== currentActive) {
+          audioSystem.playSonarPing();
+        }
+        return currentActive;
+      });
     };
 
     // Attach scroll listener
@@ -384,7 +389,10 @@ const GlobalLayout = ({ children }) => {
                   <button
                     key={node.id}
                     onClick={() => scrollToSection(node.id)}
-                    onMouseEnter={() => setHoveredNode(node.id)}
+                    onMouseEnter={() => {
+                      setHoveredNode(node.id);
+                      audioSystem.playHover();
+                    }}
                     onMouseLeave={() => setHoveredNode(null)}
                     className={`group relative z-20 flex flex-col md:flex-row items-center md:items-center text-center md:text-left transition-all duration-300 outline-none uppercase tracking-widest ${isActive ? 'reticle-nav md:reticle-active opacity-100 text-accent font-bold' : 'opacity-60 md:opacity-40 text-main hover:opacity-100 hover:text-accent'}`}
                   >
