@@ -250,9 +250,6 @@ const GlobalLayout = ({ children }) => {
               <Terminal size={14} /> 
               <DecryptedText text="SYS.BOOT" speed={40} animateOnMount />
             </span>
-            <span className="hidden md:inline-block">
-              <DecryptedText text="ID: VY-892 // SECURE CONNECTION" speed={30} delay={500} animateOnMount />
-            </span>
             
             {/* Mobile Telemetry */}
             <div className="flex md:hidden items-center gap-3 text-[10px]">
