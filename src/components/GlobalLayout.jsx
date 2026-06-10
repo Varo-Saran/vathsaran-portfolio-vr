@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2, Sun, Moon, Cloud, CloudRain, CloudLightning, CloudSnow, CloudFog, MapPin, Clock, Route, Crosshair } from 'lucide-react';
+import { Terminal, Activity, Fingerprint, Database, Mail, FolderGit2, Sun, Moon, Cloud, CloudRain, CloudLightning, CloudSnow, CloudFog, MapPin, Clock, Route, Crosshair, Battery, Cpu } from 'lucide-react';
 import { motion } from 'motion/react';
 import DecryptedText from './DecryptedText';
 import StickyTerminal from './StickyTerminal';
@@ -30,9 +30,13 @@ const GlobalLayout = ({ children }) => {
     return localStorage.getItem('optics_preference') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
   });
   const [activeSection, setActiveSection] = useState('ID_CORE');
-  const [hoveredNode, setHoveredNode] = useState(null);
-  const [trackingStatus, setTrackingStatus] = useState('TRACKING...');
   const [weather, setWeather] = useState(null);
+  const [trackingStatus, setTrackingStatus] = useState('AWAITING_LOC_DATA');
+  const [uptime, setUptime] = useState(0);
+  const [battery, setBattery] = useState(null);
+  const [osInfo, setOsInfo] = useState('UNKNOWN_OS');
+
+  // Load theme preference on mount
 
   useEffect(() => {
     // Fetch live weather for Colombo
@@ -69,8 +73,46 @@ const GlobalLayout = ({ children }) => {
     const timer = setInterval(() => {
       setTime(new Date().toISOString());
     }, 1000);
-    return () => clearInterval(timer);
+
+    // OS Detection
+    const ua = navigator.userAgent;
+    if (ua.includes('Win')) setOsInfo('WINDOWS_NT');
+    else if (ua.includes('Mac')) setOsInfo('MACOS');
+    else if (ua.includes('Linux')) setOsInfo('LINUX_KERNEL');
+    else if (ua.includes('Android')) setOsInfo('ANDROID_OS');
+    else if (ua.includes('iOS') || ua.includes('iPhone') || ua.includes('iPad')) setOsInfo('APPLE_IOS');
+
+    // Battery API
+    if ('getBattery' in navigator) {
+      navigator.getBattery().then(bat => {
+        setBattery({ level: Math.round(bat.level * 100), charging: bat.charging });
+        
+        bat.addEventListener('levelchange', () => {
+          setBattery(prev => ({ ...prev, level: Math.round(bat.level * 100) }));
+        });
+        bat.addEventListener('chargingchange', () => {
+          setBattery(prev => ({ ...prev, charging: bat.charging }));
+        });
+      });
+    }
+
+    // Uptime Timer
+    const uptimeInterval = setInterval(() => {
+      setUptime(Math.floor(performance.now() / 1000));
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(uptimeInterval);
+    };
   }, []);
+
+  const formatUptime = (secs) => {
+    const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+    const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+    const s = Math.floor(secs % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  };
 
   useEffect(() => {
     if (theme === 'light') {
@@ -238,8 +280,32 @@ const GlobalLayout = ({ children }) => {
                   {trackingStatus}
                 </span>
               </div>
+              
+              {/* Added Real Stats */}
+              <div className="hidden lg:flex items-center gap-3">
+                <span className="text-muted/40">//</span>
+                <span className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                  <Activity size={12} className="text-accent" />
+                  UP: {formatUptime(uptime)}
+                </span>
+                <span className="text-muted/40">//</span>
+                <span className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                  <Cpu size={12} className="text-accent" />
+                  {osInfo}
+                </span>
+                {battery && (
+                  <>
+                    <span className="text-muted/40">//</span>
+                    <span className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                      <Battery size={12} className={battery.charging ? 'text-green-400' : 'text-accent'} />
+                      PWR: {battery.level}%
+                    </span>
+                  </>
+                )}
+              </div>
+
               {/* Micro-Diagnostic Ticker */}
-              <div className="flex items-end gap-[2px] h-3 w-6 overflow-hidden">
+              <div className="flex items-end gap-[2px] h-3 w-6 overflow-hidden ml-2 opacity-80">
                 {[1, 2, 3, 4, 5].map(i => (
                   <motion.div 
                     key={i}

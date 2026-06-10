@@ -36,6 +36,16 @@ const Hero = () => {
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [trackingStatus, setTrackingStatus] = useState('[ ESTABLISHING UPLINK... ]');
+  const [operativeName, setOperativeName] = useState('UNKNOWN_OPERATIVE');
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    if (ua.includes('Win')) setOperativeName('WINDOWS_OPERATIVE');
+    else if (ua.includes('Mac')) setOperativeName('MACOS_OPERATIVE');
+    else if (ua.includes('Linux')) setOperativeName('LINUX_OPERATIVE');
+    else if (ua.includes('Android')) setOperativeName('ANDROID_OPERATIVE');
+    else if (ua.includes('iOS') || ua.includes('iPhone') || ua.includes('iPad')) setOperativeName('IOS_OPERATIVE');
+  }, []);
 
   // Live Geolocation Distance Tracking
   useEffect(() => {
@@ -347,10 +357,16 @@ const Hero = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
-                      className="flex items-center gap-2"
+                      className="flex flex-col gap-1"
                     >
-                      <div className="w-1.5 h-1.5 bg-accent animate-pulse" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
-                      {`> UPLINK_SECURED // SYSTEM_ONLINE`}
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-accent animate-pulse" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+                        {`> UPLINK_SECURED // SYSTEM_ONLINE`}
+                      </div>
+                      <div className="text-accent flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 opacity-0" />
+                        {`> WELCOME, ${operativeName}`}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
