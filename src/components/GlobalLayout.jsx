@@ -273,20 +273,28 @@ const GlobalLayout = ({ children }) => {
             
             {/* Mobile Telemetry */}
             <div className="flex md:hidden items-center gap-3 text-[10px]">
-                {weather && (
+                {weather ? (
                   <span className="flex items-center gap-1.5 text-accent font-secondary">
                     <WeatherIcon size={12} strokeWidth={2.5} />
                     {Math.round(weather.temperature)}°C
                   </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-accent font-secondary">
+                    <MapPin size={10} />
+                    COLOMBO
+                  </span>
                 )}
-                {battery && (
-                  <>
-                    <span className="text-muted/40">//</span>
-                    <span className="flex items-center gap-1.5 opacity-80">
-                      <Battery size={10} className={battery.charging ? 'text-green-400' : 'text-accent'} />
-                      {battery.level}%
-                    </span>
-                  </>
+                <span className="text-muted/40">//</span>
+                {battery ? (
+                  <span className="flex items-center gap-1.5 opacity-80">
+                    <Battery size={10} className={battery.charging ? 'text-green-400' : 'text-accent'} />
+                    {battery.level}%
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 opacity-80">
+                    <TimeIcon size={10} className="text-accent" />
+                    {formattedTime}
+                  </span>
                 )}
             </div>
           </div>
