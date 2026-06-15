@@ -42,9 +42,9 @@ const GlobalLayout = ({ children }) => {
   const toggleMute = () => {
     const nextMute = !isMuted;
     setIsMuted(nextMute);
-    audioSystem.enabled = !nextMute;
+    audioSystem.setEnabled(!nextMute);
     if (!nextMute) {
-      audioSystem.playKeystroke();
+      audioSystem.playClick();
     }
   };
 

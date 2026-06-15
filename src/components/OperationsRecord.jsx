@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'motion/react';
 import DecryptedText from './DecryptedText';
+import { audioSystem } from '../utils/audioSystem';
 
 const operations = [
   {
@@ -63,6 +64,7 @@ const OperationItem = ({ op, i }) => {
       viewport={{ once: true, margin: "-10%" }}
       transition={{ duration: 0.3, delay: i * 0.1, ease: "linear" }}
       className="relative flex items-start group cursor-pointer md:cursor-default"
+      onMouseEnter={() => audioSystem.playHover()}
     >
       {/* Timeline Info (Left) */}
       <div className="hidden md:block w-[100px] text-right pr-6 pt-1">

@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'motion/react';
 import DecryptedText from './DecryptedText';
+import { audioSystem } from '../utils/audioSystem';
 
 const skillModules = [
   {
@@ -70,6 +71,7 @@ const SkillModuleItem = ({ module, i }) => {
       viewport={{ once: true, margin: "-10%" }}
       transition={{ delay: i * 0.1, duration: 0.3 }}
       className={`relative group ${module.span} reticle-md cursor-pointer md:cursor-default`}
+      onMouseEnter={() => audioSystem.playHover()}
     >
       <div className={`h-full border transition-all duration-300 p-5 md:p-6 flex flex-col gap-4 backdrop-blur-md group-hover:bg-dbh-active group-hover:clip-notch group-hover:border-transparent ${active ? 'bg-dbh-active clip-notch border-transparent' : 'bg-surface/80 border-border'}`}>
         {/* Diagnostic Header */}
