@@ -38,7 +38,7 @@
   }
 
   :root.light {
-    /* Light Theme (DBH Clinical Glass) */
+    /* Light Theme (DBH Precision Glass) */
     --theme-bg: oklch(0.99 0.01 250);
     --theme-surface: oklch(1 0.01 250 / 0.65);
     --theme-text-main: oklch(0.25 0.02 250);

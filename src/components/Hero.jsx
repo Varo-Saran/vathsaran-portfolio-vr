@@ -118,6 +118,8 @@ const Hero = () => {
             onClick={() => setIsMapExpanded(!isMapExpanded)}
             onMouseEnter={() => audioSystem.playHover()}
             className="flex items-center justify-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/30 text-accent hover:bg-accent hover:text-bg transition-colors text-[9px] tracking-widest font-tertiary shadow-[0_0_10px_rgba(var(--color-accent),0.1)] w-max reticle-sm"
+            aria-expanded={isMapExpanded}
+            aria-controls="colombo-map-container"
           >
             <ScanLine size={10} className="animate-pulse" />
             {isMapExpanded ? "COLLAPSE" : "SCAN"}
@@ -128,6 +130,7 @@ const Hero = () => {
         <AnimatePresence>
           {isMapExpanded && (
             <motion.div
+              id="colombo-map-container"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "120px", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -156,7 +159,7 @@ const Hero = () => {
       <div className="grid grid-cols-2 gap-2 uppercase mt-2">
         {[
           { id: 'EMAIL', icon: <IconGmail size={14} />, href: 'mailto:varosaran@gmail.com' },
-          { id: 'GITHUB', icon: <IconGitHub size={14} />, href: 'https://github.com/vathsaran' },
+          { id: 'GITHUB', icon: <IconGitHub size={14} />, href: 'https://github.com/Varo-Saran' },
           { id: 'LINKEDIN', icon: <IconLinkedIn size={14} />, href: 'https://linkedin.com/in/vathsaran' },
           { id: 'X_TWITTER', icon: <IconX size={14} />, href: 'https://twitter.com/vathsaran' },
           { id: 'WEBSITE', icon: <Globe size={14} />, href: 'https://vathsaran.com' }
@@ -168,6 +171,7 @@ const Hero = () => {
             rel="noreferrer"
             onMouseEnter={() => audioSystem.playHover()}
             className={`group/link flex items-center justify-center p-2 border border-border/40 bg-surface/20 hover:bg-surface hover:border-accent/50 transition-all duration-300 relative overflow-hidden cursor-pointer reticle-sm ${social.id === 'WEBSITE' ? 'col-span-2' : ''}`}
+            aria-label={`${social.id} (opens in a new tab)`}
           >
             <div className="flex items-center justify-center w-full text-muted group-hover/link:text-accent transition-colors z-10 relative gap-2">
               <span className="text-accent/70 group-hover/link:text-accent">{social.icon}</span>
@@ -211,6 +215,7 @@ const Hero = () => {
           onClick={() => setShowDataOverlay(!showDataOverlay)}
           onMouseEnter={() => audioSystem.playHover()}
           aria-label="Toggle Telemetry Overlay"
+          aria-expanded={showDataOverlay}
           animate={{ x: [0, 4, 0] }}
           transition={{ repeat: Infinity, duration: 0.15, repeatDelay: 2, ease: "linear" }}
         >
@@ -309,9 +314,12 @@ const Hero = () => {
             transition={{ delay: 1.0, duration: 0.4 }}
             className="md:hidden fixed right-0 top-1/3 -translate-y-1/2 z-[9999] py-4 px-2 bg-surface/60 backdrop-blur-md border border-r-0 border-border/50 text-accent font-tertiary flex flex-col items-center gap-3 reticle-sm hover:bg-surface/80 transition-colors shadow-[0_0_15px_rgba(0,0,0,0.5)] rounded-l-md"
             onClick={() => setIsMobileDrawerOpen(true)}
+            aria-label="Open telemetry drawer"
+            aria-haspopup="dialog"
+            aria-expanded={isMobileDrawerOpen}
           >
-            <Fingerprint size={16} className="animate-pulse opacity-80" />
-            <span className="[writing-mode:vertical-rl] text-[10px] tracking-widest uppercase opacity-80">Telemetry</span>
+            <Fingerprint size={16} className="animate-pulse opacity-80" aria-hidden="true" />
+            <span className="[writing-mode:vertical-rl] text-[10px] tracking-widest uppercase opacity-80" aria-hidden="true">Telemetry</span>
           </motion.button>,
           document.body
         ) : null}
@@ -431,12 +439,12 @@ const Hero = () => {
               transition={{ delay: 1.4, duration: 0.2 }}
               className="flex flex-wrap gap-4 mt-8"
             >
-              <button className="relative group reticle-lg outline-none border border-transparent" onClick={() => document.getElementById('COM_LNK')?.scrollIntoView({ behavior: 'smooth' })} onMouseEnter={() => audioSystem.playHover()}>
+              <button className="relative group reticle-lg outline-none border border-transparent" onClick={() => document.getElementById('COM_LNK')?.scrollIntoView({ behavior: 'smooth' })} onMouseEnter={() => audioSystem.playHover()} aria-label="Initiate contact">
                 <div className="bg-accent text-bg font-primary uppercase tracking-widest text-sm px-6 py-3 group-hover:bg-dbh-active group-hover:text-white transition-colors duration-200 flex items-center gap-2 clip-notch w-full h-full">
-                  <span className="font-tertiary group-hover:text-white/60">#</span> INITIATE_CONTACT
+                  <span aria-hidden="true" className="font-tertiary group-hover:text-white/60">#</span> INITIATE_CONTACT
                 </div>
               </button>
-              <a href="/CV_Vathsaran_Yasotharan.pdf" target="_blank" rel="noreferrer" className="relative group reticle-lg outline-none block" onMouseEnter={() => audioSystem.playHover()}>
+              <a href="/CV_Vathsaran_Yasotharan.pdf" target="_blank" rel="noreferrer" className="relative group reticle-lg outline-none block" onMouseEnter={() => audioSystem.playHover()} aria-label="Download CV dataset (opens in a new tab)">
                 <div className="border border-accent/50 bg-surface/50 text-accent font-primary uppercase tracking-widest text-sm px-6 py-3 group-hover:bg-dbh-active group-hover:text-white group-hover:border-transparent transition-colors duration-200 flex items-center gap-2 clip-notch w-full h-full">
                   DOWNLOAD_DATASET [CV]
                 </div>
@@ -467,6 +475,9 @@ const Hero = () => {
                 exit={{ x: '100%' }}
                 transition={{ type: "tween", ease: "anticipate", duration: 0.4 }}
                 className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-surface/90 border-l border-border z-[9999] flex flex-col p-4 md:hidden overflow-y-auto backdrop-blur-xl pb-24"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Telemetry drawer"
               >
                 <div className="flex justify-between items-center mb-6 border-b border-border/50 pb-4">
                   <span className="text-accent font-tertiary text-xs tracking-widest uppercase flex items-center gap-2">
@@ -476,6 +487,7 @@ const Hero = () => {
                   <button 
                     onClick={() => setIsMobileDrawerOpen(false)} 
                     className="p-2 text-muted hover:text-accent border border-transparent hover:border-accent/30 bg-bg/50 transition-colors reticle-sm"
+                    aria-label="Close telemetry drawer"
                   >
                      <X size={16} />
                   </button>

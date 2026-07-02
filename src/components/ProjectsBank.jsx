@@ -14,10 +14,10 @@ const projects = [
   },
   {
     id: "SYS.PRJ.02",
-    title: "Clinical Heart Disease Prediction System",
+    title: "Biometric Pattern Classification Model",
     metric: "90.16% Acc",
-    description: "Built a Random Forest classifier achieving 90.16% accuracy for early heart disease detection. Reduced the feature space from 13 to 8 using Recursive Feature Elimination (RFE) while maintaining model performance.",
-    tags: ["Random Forest", "RFE", "Healthcare Analytics"]
+    description: "Engineered a Random Forest classifier achieving 90.16% accuracy for high-dimensional biometric signal classification. Applied Recursive Feature Elimination (RFE) to optimize the pipeline, streamlining the feature space from 13 to 8 dimensions while preserving model predictive power.",
+    tags: ["Random Forest", "RFE", "Signal Processing"]
   },
   {
     id: "SYS.PRJ.03",
@@ -62,12 +62,12 @@ const EqualizerCanvas = () => (
   </div>
 );
 
-const EkgCanvas = () => (
+const SignalCanvas = () => (
   <div className="w-full h-32 md:h-full min-h-[120px] relative border border-border bg-bg/50 overflow-hidden flex items-center justify-center reticle-md">
     <svg viewBox="0 0 200 100" className="w-full h-full text-accent" preserveAspectRatio="xMidYMid slice">
-      <path d="M0 50 H40 L50 20 L60 80 L70 40 L80 50 H200" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.2" />
+      <path d="M0 50 L20 50 L30 35 L40 65 L50 45 L60 55 L70 25 L80 75 L95 50 L110 50 L120 35 L130 65 L140 45 L150 55 L160 25 L170 75 L185 50 H200" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.2" />
       <motion.path
-        d="M0 50 H40 L50 20 L60 80 L70 40 L80 50 H200"
+        d="M0 50 L20 50 L30 35 L40 65 L50 45 L60 55 L70 25 L80 75 L95 50 L110 50 L120 35 L130 65 L140 45 L150 55 L160 25 L170 75 L185 50 H200"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -161,7 +161,7 @@ const ProjectsBank = () => {
   const renderTelemetry = (id) => {
     switch (id) {
       case "SYS.PRJ.01": return <EqualizerCanvas />;
-      case "SYS.PRJ.02": return <EkgCanvas />;
+      case "SYS.PRJ.02": return <SignalCanvas />;
       case "SYS.PRJ.03": return <RadarCanvas />;
       case "SYS.PRJ.04": return <SineWaveCanvas />;
       case "SYS.PRJ.05": return <DecisionTreeCanvas />;

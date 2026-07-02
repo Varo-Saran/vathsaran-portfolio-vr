@@ -42,11 +42,11 @@ My technical framework includes advanced statistical protocols (hypothesis testi
 * **Image Prompt/Idea:** Abstract futuristic data nodes glowing in cyan and purple, visualizing a network of premium customers, 4k resolution, deep dark glassmorphism background.
 
 ### Project 2
-* **Title:** Clinical Heart Disease Prediction System
-* **Description:** Built a Random Forest classifier achieving 90.16% accuracy for early heart disease detection. Reduced the feature space from 13 to 8 using Recursive Feature Elimination (RFE) while maintaining model performance.
+* **Title:** Biometric Pattern Classification Model
+* **Description:** Engineered a Random Forest classifier achieving 90.16% accuracy for high-dimensional biometric signal classification. Applied Recursive Feature Elimination (RFE) to optimize the pipeline, streamlining the feature space from 13 to 8 dimensions while preserving model predictive power.
 * **Demo URL:** [Coming soon]
 * **GitHub URL:** [Coming soon]
-* **Image Prompt/Idea:** A stylized, glowing neon 3D heart floating behind a frosted glass pane, dark clinical blue and electric purple hues, high-tech medical aesthetic.
+* **Image Prompt/Idea:** A stylized, glowing neon 3D signal waveform display floating behind a frosted glass pane, dark cyan and electric purple hues, high-tech telemetry aesthetic.
 
 ### Project 3
 * **Title:** Autonomous Vehicle Public Perception Study

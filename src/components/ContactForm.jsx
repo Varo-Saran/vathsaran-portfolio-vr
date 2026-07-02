@@ -121,7 +121,7 @@ const ContactForm = () => {
                 { id: 'EMAIL', label: 'varosaran@gmail.com', icon: IconGmail, href: 'mailto:varosaran@gmail.com' },
                 { id: 'LOC', label: 'Colombo, LK', icon: MapPin, href: null },
                 { id: 'LINKEDIN', label: 'LINKEDIN_PROFILE', icon: IconLinkedIn, href: 'https://linkedin.com/in/vathsaran' },
-                { id: 'GITHUB', label: 'GITHUB_ACCESS', icon: IconGitHub, href: 'https://github.com/vathsaran' },
+                { id: 'GITHUB', label: 'GITHUB_ACCESS', icon: IconGitHub, href: 'https://github.com/Varo-Saran' },
                 { id: 'X_NET', label: 'X_TRANSMISSION', icon: IconX, href: 'https://twitter.com/vathsaran' }
               ].map((social) => {
                 const Icon = social.icon;
@@ -137,9 +137,9 @@ const ContactForm = () => {
                     {/* Brackets logic */}
                     <div className="flex items-center justify-between text-muted group-hover:text-accent transition-colors">
                       <span className="flex items-center gap-2 text-[10px] tracking-widest font-tertiary">
-                        <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">[</span>
+                        <span aria-hidden="true" className="inline-block transition-transform duration-300 group-hover:-translate-x-1">[</span>
                         {social.id}
-                        <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">]</span>
+                        <span aria-hidden="true" className="inline-block transition-transform duration-300 group-hover:translate-x-1">]</span>
                       </span>
                       <Icon size={14} />
                     </div>
@@ -156,7 +156,7 @@ const ContactForm = () => {
 
                 if (social.href) {
                   return (
-                    <a href={social.href} target="_blank" rel="noreferrer" className="block outline-none" key={social.id}>
+                    <a href={social.href} target="_blank" rel="noreferrer" className="block outline-none" key={social.id} aria-label={`${social.id} - ${social.label} (opens in a new tab)`}>
                       {inner}
                     </a>
                   );
@@ -179,6 +179,7 @@ const ContactForm = () => {
             method="POST" 
             onSubmit={handleSubmit}
             className="flex flex-col gap-6"
+            aria-label="Contact Form"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <HoloInput 

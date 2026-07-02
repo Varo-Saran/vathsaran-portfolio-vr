@@ -354,17 +354,19 @@ const GlobalLayout = ({ children }) => {
               onClick={toggleMute}
               className="group flex items-center gap-2 text-[10px] font-tertiary text-muted hover:text-accent transition-colors outline-none mr-2 md:mr-0"
               title="Toggle Audio"
+              aria-label={isMuted ? "Unmute audio" : "Mute audio"}
             >
               {isMuted ? <VolumeX size={14} className="text-red-500" /> : <Volume2 size={14} />}
             </button>
             <button 
               onClick={toggleTheme}
               className="group flex items-center gap-4 text-[10px] font-tertiary text-muted transition-colors outline-none"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
             >
               <span className="tracking-[0.2em] group-hover:text-accent transition-colors">THEME</span>
               
               {/* Mechanical Switch Track */}
-              <div className="relative w-20 h-6 border border-border bg-surface cursor-pointer reticle-sm">
+              <div className="relative w-20 h-6 border border-border bg-surface cursor-pointer reticle-sm" aria-hidden="true">
                 {/* Hardware Toggle Block */}
                 <motion.div 
                   className="absolute top-[2px] left-[2px] w-[34px] h-[18px] bg-accent shadow-[0_0_10px_rgba(var(--color-accent),0.3)] z-0"
@@ -420,9 +422,11 @@ const GlobalLayout = ({ children }) => {
                     }}
                     onMouseLeave={() => setHoveredNode(null)}
                     className={`group relative z-20 flex flex-col md:flex-row items-center md:items-center text-center md:text-left transition-all duration-300 outline-none uppercase tracking-widest ${isActive ? 'reticle-nav md:reticle-active opacity-100 text-accent font-bold' : 'opacity-60 md:opacity-40 text-main hover:opacity-100 hover:text-accent'}`}
+                    aria-label={`Navigate to ${node.id.replace('_', ' ')}`}
+                    aria-current={isActive ? "page" : undefined}
                   >
                     {/* Desktop Hover Brackets */}
-                    <span className={`hidden md:inline-block transition-transform duration-300 ${isActive ? '-translate-x-1 opacity-0' : 'group-hover:-translate-x-1 opacity-100'}`}>[</span>
+                    <span aria-hidden="true" className={`hidden md:inline-block transition-transform duration-300 ${isActive ? '-translate-x-1 opacity-0' : 'group-hover:-translate-x-1 opacity-100'}`}>[</span>
                     
                     {/* Mobile Icon */}
                     <Icon size={20} strokeWidth={1.5} className={`mb-1 md:hidden transition-colors ${isActive ? 'text-accent' : ''}`} />
@@ -442,7 +446,7 @@ const GlobalLayout = ({ children }) => {
                     </span>
                     
                     {/* Desktop Hover Brackets */}
-                    <span className={`hidden md:inline-block transition-transform duration-300 ${isActive ? 'translate-x-1 opacity-0' : 'group-hover:translate-x-1 opacity-100'}`}>]</span>
+                    <span aria-hidden="true" className={`hidden md:inline-block transition-transform duration-300 ${isActive ? 'translate-x-1 opacity-0' : 'group-hover:translate-x-1 opacity-100'}`}>]</span>
                   </button>
                 );
               })}
@@ -461,11 +465,15 @@ const GlobalLayout = ({ children }) => {
               <span className="flex items-center gap-2 group cursor-default">
                 <span className="group-hover:anim-glitch-label transition-colors duration-300">END OF TRANSMISSION</span>
               </span>
-              <span className="bracket-hover text-accent cursor-pointer flex items-center group text-right" onClick={() => scrollToSection('ID_CORE')}>
-                <span className="hidden md:inline">[ VERIFY_LOG ]</span>
-                <span className="md:hidden">[ TOP ]</span>
+              <button 
+                className="bracket-hover text-accent flex items-center group text-right bg-transparent border-none p-0 cursor-pointer font-tertiary text-[10px] md:text-xs outline-none focus-visible:ring-1 focus-visible:ring-accent" 
+                onClick={() => scrollToSection('ID_CORE')}
+                aria-label="Scroll to top core profile"
+              >
+                <span aria-hidden="true" className="hidden md:inline">[ VERIFY_LOG ]</span>
+                <span aria-hidden="true" className="md:hidden">[ TOP ]</span>
                 <span className="inline-block w-2 h-3 bg-accent ml-2 animate-pulse group-hover:bg-main transition-colors" />
-              </span>
+              </button>
               
               {/* Constant Transmission Strip */}
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent/10">
