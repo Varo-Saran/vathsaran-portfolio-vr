@@ -275,7 +275,7 @@ const Hero = () => {
   );
 
   return (
-    <section id="ID_CORE" className="min-h-[85vh] w-full flex flex-col justify-center px-4 md:px-12 lg:px-24 pt-12 pb-24 border-b border-border relative">
+    <section id="ID_CORE" itemScope itemType="https://schema.org/Person" className="min-h-[85vh] w-full flex flex-col justify-center px-4 md:px-12 lg:px-24 pt-12 pb-24 border-b border-border relative">
       {/* Background decoration & Data Drift */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-5 hidden lg:block text-[20rem] font-primary leading-none">
@@ -405,19 +405,19 @@ const Hero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.0, duration: 0.2, ease: "easeOut" }}
             >
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-primary text-main tracking-widest leading-none uppercase animate-hud-glitch">
-                Vathsaran<br />
+              <h1 itemProp="name" className="text-4xl md:text-6xl lg:text-7xl font-primary text-main tracking-widest leading-none uppercase animate-hud-glitch">
+                <span itemProp="alternateName">Vathsaran</span><br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-muted">
                   Yasotharan
                 </span>
               </h1>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-2">
-                <h2 className="text-lg md:text-xl font-primary text-muted tracking-widest uppercase flex items-center gap-2">
+                <h2 itemProp="jobTitle" className="text-lg md:text-xl font-primary text-muted tracking-widest uppercase flex items-center gap-2">
                   <Database size={18} className="text-accent" />
                   Data Scientist
                 </h2>
                 <span className="hidden sm:inline-block text-muted/50">|</span>
-                <h2 className="text-lg md:text-xl font-primary text-muted tracking-widest uppercase">
+                <h2 itemProp="jobTitle" className="text-lg md:text-xl font-primary text-muted tracking-widest uppercase">
                   Machine Learning Engineer
                 </h2>
               </div>
